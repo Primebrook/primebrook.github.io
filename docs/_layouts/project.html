@@ -1,0 +1,19 @@
+---
+layout: page
+---
+
+{{ content }}
+
+<h2 class="post-list-heading line-bottom">{{ page.list_title | default: "Posts" }}</h2>
+<div id="projects-list">
+  <ul class="post-list">
+    {% assign page_category = page.categories | first %}
+    {% for post in site.posts %}
+      {% if post.categories contains page_category %}
+      <li>
+        {% include post_preview.html post=post %}
+      </li><br/>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>

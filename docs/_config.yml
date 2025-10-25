@@ -1,0 +1,38 @@
+title: Brook's Blog
+email: brook.a.abraha@gmail.com
+description: >- # this means to ignore newlines until "baseurl:"
+  A mathematical journey through ideas, proofs, and explorations.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
+github_username: primebrook
+# google_analytics: YOUR-TRACKING-ID  # Add your Google Analytics ID if you have one
+show_excerpts: true
+# disqus:
+#   shortname: your-disqus-shortname  # Add your Disqus shortname if you want comments
+
+permalink: /:categories/:title:output_ext
+
+collections:
+  projects:
+    output: true
+    permalink: /:collection/:categories:output_ext
+
+header_pages:
+  - projects/index.html
+  - life/index.html
+  - about.html
+
+markdown: kramdown
+kramdown:
+  parse_block_html: true
+  math_engine: mathjax
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+# Build settings
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap

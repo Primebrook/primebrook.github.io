@@ -1,0 +1,30 @@
+---
+layout: page
+title: Projects
+---
+<div>
+  Here you can find a list of projects & tutorials I've published on this blog :-)
+</div> </br>
+
+
+<div id="projects-list">
+  {% for project in site.projects %}
+  <div class="project-list">
+    <div id="#{{ project.name | slugize }}"></div>
+    <h3 class="post-list-heading line-bottom">
+      <a href="{{ project.url }}">{{ project.title }}</a>
+    </h3>
+    {{ project.content | markdownify }}
+      <ul class="post-list">
+      {% assign project_category = project.categories | first %}
+      {% for post in site.posts %}
+        {% if post.categories contains project_category %}
+        <li>
+          {% include post_preview.html post=post %}
+        </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</div>
