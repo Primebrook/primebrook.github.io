@@ -10,16 +10,9 @@ show_excerpts: true
 # disqus:
 #   shortname: your-disqus-shortname  # Add your Disqus shortname if you want comments
 
-permalink: /:categories/:title:output_ext
-
-collections:
-  projects:
-    output: true
-    permalink: /:collection/:categories:output_ext
+permalink: /:title:output_ext
 
 header_pages:
-  - projects/index.html
-  - life/index.html
   - about.html
 
 markdown: kramdown
