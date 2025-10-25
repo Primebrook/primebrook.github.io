@@ -85,6 +85,7 @@ Store images in `/docs/assets/img/` directory.
 
 ## Creating a New Post
 
+### Published Posts
 1. Create a file in `docs/_posts/` with format: `YYYY-MM-DD-title.markdown`
 2. Add frontmatter:
 ```yaml
@@ -96,6 +97,19 @@ categories: math calculus
 ---
 ```
 3. Write your content with LaTeX, code, and images!
+
+### Draft Posts
+1. Create a file in `docs/_drafts/` with just the title: `title.markdown` (no date)
+2. Add frontmatter (no date needed):
+```yaml
+---
+layout: post
+title: "Work in Progress Title"
+categories: math
+---
+```
+3. View drafts locally with: `bundle exec jekyll serve --drafts`
+4. Drafts are automatically excluded from production builds!
 
 ## Tips
 
