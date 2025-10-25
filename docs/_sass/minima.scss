@@ -9,13 +9,41 @@ $base-line-height: 1.5 !default;
 
 $spacing-unit:     30px !default;
 
-$text-color:       #291b25 !default;
-$background-color: #ffce6d !default;
-$brand-color:      #ed5b2d !default;
+// ============================================
+// COLOR SCHEMES - Uncomment one to use
+// ============================================
 
-$grey-color:       #291b25 !default;
+// OPTION 1: Clean/Minimal - White with blue accents (ACTIVE)
+$text-color:       #2c3e50 !default;
+$background-color: #f8f9fa !default;
+$brand-color:      #3498db !default;
+$grey-color:       #6c757d !default;
 $grey-color-light: lighten($grey-color, 40%) !default;
 $grey-color-dark:  darken($grey-color, 25%) !default;
+
+// OPTION 2: Dark Academia - Cream with brown/navy
+// $text-color:       #2c2416 !default;
+// $background-color: #f5f1e8 !default;
+// $brand-color:      #8b4513 !default;
+// $grey-color:       #5c4f3d !default;
+// $grey-color-light: lighten($grey-color, 40%) !default;
+// $grey-color-dark:  darken($grey-color, 25%) !default;
+
+// OPTION 3: Modern/Tech - Light gray with teal accents
+// $text-color:       #1a202c !default;
+// $background-color: #edf2f7 !default;
+// $brand-color:      #0d9488 !default;
+// $grey-color:       #4a5568 !default;
+// $grey-color-light: lighten($grey-color, 40%) !default;
+// $grey-color-dark:  darken($grey-color, 25%) !default;
+
+// ORIGINAL: Yellow theme (Emma's blog)
+// $text-color:       #291b25 !default;
+// $background-color: #ffce6d !default;
+// $brand-color:      #ed5b2d !default;
+// $grey-color:       #291b25 !default;
+// $grey-color-light: lighten($grey-color, 40%) !default;
+// $grey-color-dark:  darken($grey-color, 25%) !default;
 
 $table-text-align: left !default;
 
