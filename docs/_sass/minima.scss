@@ -14,12 +14,12 @@ $spacing-unit:     30px !default;
 // ============================================
 
 // OPTION 1: Clean/Minimal - White with blue accents (ACTIVE)
-$text-color:       #2c3e50 !default;
-$background-color: #f8f9fa !default;
-$brand-color:      #3498db !default;
-$grey-color:       #6c757d !default;
-$grey-color-light: lighten($grey-color, 40%) !default;
-$grey-color-dark:  darken($grey-color, 25%) !default;
+// $text-color:       #2c3e50 !default;
+// $background-color: #f8f9fa !default;
+// $brand-color:      #3498db !default;
+// $grey-color:       #6c757d !default;
+// $grey-color-light: lighten($grey-color, 40%) !default;
+// $grey-color-dark:  darken($grey-color, 25%) !default;
 
 // OPTION 2: Dark Academia - Cream with brown/navy
 // $text-color:       #2c2416 !default;
@@ -30,12 +30,12 @@ $grey-color-dark:  darken($grey-color, 25%) !default;
 // $grey-color-dark:  darken($grey-color, 25%) !default;
 
 // OPTION 3: Modern/Tech - Light gray with teal accents
-// $text-color:       #1a202c !default;
-// $background-color: #edf2f7 !default;
-// $brand-color:      #0d9488 !default;
-// $grey-color:       #4a5568 !default;
-// $grey-color-light: lighten($grey-color, 40%) !default;
-// $grey-color-dark:  darken($grey-color, 25%) !default;
+$text-color:       #1a202c !default;
+$background-color: #edf2f7 !default;
+$brand-color:      #0d9488 !default;
+$grey-color:       #4a5568 !default;
+$grey-color-light: lighten($grey-color, 40%) !default;
+$grey-color-dark:  darken($grey-color, 25%) !default;
 
 // ORIGINAL: Yellow theme (Emma's blog)
 // $text-color:       #291b25 !default;
