@@ -13,8 +13,7 @@ show_excerpts: true
 
 permalink: /:title:output_ext
 
-header_pages:
-  - about.html
+# header_pages: []
 
 markdown: kramdown
 kramdown:
