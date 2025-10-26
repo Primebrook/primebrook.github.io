@@ -3,6 +3,6 @@ layout: home
 list_title: "Recent Posts"
 ---
 
-Hey there! Welcome to Brook's Blog.
+Hello there 👋, welcome to my blog!
 
-This is where I explore mathematical ideas, share proofs, and dive into the beauty of mathematics. Thanks for stopping by!
+I'm Brook, a software engineer working in London. This blog is where I explore topics I find interesting in Computer Science, Mathematics and Software Engineering.

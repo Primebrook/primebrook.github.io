@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Math Blog Demo - LaTeX, Code, and Images"
-date: 2025-10-25 12:00:00 -0700
 categories: demo math
 ---
 
