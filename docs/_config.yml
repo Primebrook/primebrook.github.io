@@ -3,7 +3,7 @@ email: brook.a.abraha@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   A blog on topics I find interesting in computer science, mathematics and software engineering.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://primebrook.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: primebrook
 linkedin_username: brook-abraha-652168203
 # google_analytics: YOUR-TRACKING-ID  # Add your Google Analytics ID if you have one
