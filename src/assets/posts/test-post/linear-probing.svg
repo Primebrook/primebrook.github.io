@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 170" font-family="Mulish, system-ui, sans-serif">
+  <title>Linear probing: key 31 hashes to slot 3, finds it taken, and probes forward to slot 5</title>
+  <rect width="640" height="170" fill="#ffffff"/>
+  <g font-size="14" text-anchor="middle">
+    <g fill="#f4f4f5" stroke="#d4d4d8" stroke-width="1.5">
+      <rect x="54" y="60" width="72" height="44" rx="6"/>
+      <rect x="130" y="60" width="72" height="44" rx="6"/>
+      <rect x="206" y="60" width="72" height="44" rx="6"/>
+      <rect x="282" y="60" width="72" height="44" rx="6" fill="#fdecea" stroke="#e5533d"/>
+      <rect x="358" y="60" width="72" height="44" rx="6" fill="#fdecea" stroke="#e5533d"/>
+      <rect x="434" y="60" width="72" height="44" rx="6" fill="#ffffff" stroke="#15171a"/>
+      <rect x="510" y="60" width="72" height="44" rx="6"/>
+    </g>
+    <g fill="#15171a" font-weight="600">
+      <text x="166" y="87">22</text>
+      <text x="318" y="87">10</text>
+      <text x="394" y="87">4</text>
+      <text x="470" y="87">31</text>
+    </g>
+    <g fill="#8a8f98" font-size="13">
+      <text x="90" y="126">0</text><text x="166" y="126">1</text><text x="242" y="126">2</text>
+      <text x="318" y="126">3</text><text x="394" y="126">4</text><text x="470" y="126">5</text>
+      <text x="546" y="126">6</text>
+    </g>
+    <text x="318" y="30" fill="#8a8f98" font-size="13">h(31) = 3</text>
+    <path d="M318 38 V56" stroke="#8a8f98" stroke-width="1.5" marker-end="url(#a)"/>
+    <path d="M330 150 C 360 162, 380 162, 394 150 M406 150 C 430 162, 450 162, 466 150" fill="none" stroke="#e5533d" stroke-width="1.5" marker-end="url(#r)"/>
+    <text x="400" y="168" fill="#e5533d" font-size="12">probe, probe</text>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#8a8f98"/></marker>
+    <marker id="r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#e5533d"/></marker>
+  </defs>
+</svg>

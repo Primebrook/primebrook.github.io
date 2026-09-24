@@ -2,6 +2,7 @@
 title: "Test post: maths, algorithms, diagrams and animation"
 description: A test post for checking what the blog can render. Not a real article.
 pubDate: 2026-09-24
+unlisted: true
 ---
 
 import Pseudocode from '../../components/Pseudocode.astro';
@@ -9,9 +10,10 @@ import Mermaid from '../../components/Mermaid.astro';
 import HashingAnimation from '../../components/HashingAnimation.astro';
 
 <div class="callout">
-  <strong>This is a test post.</strong> It exists to check what this blog can render:
-  LaTeX from beyond the basics, algorithms, diagrams and an animated figure. It isn't an
-  article and will be deleted once the real posts start.
+  <strong>This is a test post.</strong> It shows everything this blog can render:
+  LaTeX from beyond the basics, algorithms, diagrams, images and an animated figure. It
+  isn't an article. It's kept as a reference for writing real posts, and it's left off
+  the home page.
 </div>
 
 ## 1. Inline and display maths
@@ -224,7 +226,15 @@ jumps straight to the final state.
 
 <HashingAnimation />
 
-## 10. What doesn't work
+## 10. Images
+
+A static image, stored in `src/assets/posts/test-post/` and referenced by a relative
+path, so Astro processes it at build time. The alt text doubles as the description
+for screen readers.
+
+![Linear probing: key 31 hashes to slot 3, finds slots 3 and 4 taken, and lands in slot 5](../../assets/posts/test-post/linear-probing.svg)
+
+## 11. What doesn't work
 
 These were each tested against KaTeX 0.18 while building this post:
 

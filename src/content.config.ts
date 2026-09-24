@@ -10,6 +10,9 @@ const posts = defineCollection({
     pubDate: z.coerce.date(),
     // Drafts render under `npm run dev` and are left out of the built site.
     draft: z.boolean().default(false),
+    // Unlisted posts are built and reachable by URL, but are left off the home
+    // page and marked noindex. The test post is one: a permanent reference.
+    unlisted: z.boolean().default(false),
   }),
 });
 

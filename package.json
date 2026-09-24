@@ -9,7 +9,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "verify": "astro build && node scripts/verify-dist.mjs",
+    "inspect": "node scripts/inspect.mjs",
+    "verify:drafts": "INCLUDE_DRAFTS=1 astro build && node scripts/verify-dist.mjs && echo 'dist/ now contains drafts: run npm run build before anything that uses dist/ as the real site'"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
@@ -28,5 +32,10 @@
   },
   "overrides": {
     "katex": "$katex"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.6.2",
+    "typescript": "^6.0.3"
   }
 }

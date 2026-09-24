@@ -1,162 +1,81 @@
-# Math Blog Reference Guide
+# Maths reference
 
-This guide shows you how to use LaTeX, code blocks, and images in your blog posts.
+Maths is rendered by [KaTeX](https://katex.org/docs/supported) 0.18 at build
+time. Every entry below was checked against it; the
+[test post](src/content/posts/test-post.mdx) shows each one rendered.
 
-## LaTeX Math Support
+## Delimiters
 
-### Inline Math
-Use single dollar signs `$...$` or `\(...\)` for inline math:
-- `$E = mc^2$` renders as $E = mc^2$
-- `$\sum_{i=1}^{n} i$` renders as $\sum_{i=1}^{n} i$
+| Write | For |
+| --- | --- |
+| `$…$` | inline maths |
+| `$$…$$` on one line, or with `$$` on their own lines | display maths |
 
-### Block Math (Display Mode)
-Use double dollar signs `$$...$$` or `\[...\]` for centered equations:
+`\(…\)` and `\[…\]` don't work here. One-line `$$…$$` is display maths, as in
+Obsidian.
 
-```latex
-$$
-\int_{0}^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
-$$
+## Works
+
+| Package or area | Examples |
+| --- | --- |
+| amsmath environments | `align`, `aligned`, `gathered`, `split`, `cases`, `rcases`, `pmatrix`, `bmatrix`, `vmatrix`, `Bmatrix`, `smallmatrix`, `array` with `\hline` |
+| amsmath commands | `\tag{…}`, `\text`, `\dfrac`, `\tfrac`, `\binom`, `\substack`, `\underbrace`, `\overbrace`, `\overset`, `\underset`, `\xrightarrow[below]{above}`, `\boxed`, `\operatorname*`, `\pmod`, `\bmod` |
+| mathtools | `dcases`, `\coloneqq`, `\eqqcolon`, `\mathllap`, `\mathrlap` |
+| fonts (amssymb, mathrsfs, eufrak) | `\mathbb`, `\mathcal`, `\mathscr`, `\mathfrak`, `\mathsf`, `\boldsymbol`, `\bm` |
+| amscd | `\begin{CD} A @>f>> B \\ @VgVV @VVhV \\ C @>>k> D \end{CD}` |
+| xcolor | `\textcolor{teal}{x}`, `\color{…}`, `\colorbox{#fde68a}{text}` |
+| cancel | `\cancel`, `\bcancel`, `\xcancel` |
+| braket | `\ket`, `\bra`, `\braket`, `\Braket` |
+| stmaryrd | `\llbracket`, `\rrbracket` |
+| logic and types | `\vdash`, `\models`, `\nvdash`, `\forall`, `\exists`, `\neg`, `\lor`, `\iff`, inference rules as stacked `\frac` |
+| per-expression macros | `\newcommand{\foo}{…}` works within the one expression it's in |
+
+`\colorbox` holds text, so don't nest `$…$` inside it within inline maths: the
+inner `$` ends the outer expression.
+
+## Site-wide macros
+
+Defined in `astro.config.mjs`, usable in every post:
+
+| Macro | Expands to |
+| --- | --- |
+| `\R`, `\N`, `\Z` | `\mathbb{R}`, `\mathbb{N}`, `\mathbb{Z}` |
+| `\E` | `\mathbb{E}` |
+| `\Var` | `\operatorname{Var}` |
+| `\bigO` | `\mathcal{O}` |
+| `\argmax` | `\operatorname*{arg\,max}` |
+| `\sem{e}` | `\llbracket e \rrbracket` |
+
+Add a new one there when it's used in more than one post. This is the
+replacement for a LaTeX preamble.
+
+## Doesn't work, and what to do instead
+
+| LaTeX | Instead |
+| --- | --- |
+| TikZ / PGF | A hand-made SVG component (see `HashingAnimation.astro`), or an SVG exported from TikZ elsewhere and added as an image |
+| `algorithmic`, `algorithm2e` | The `Pseudocode` component, which takes `algorithmic` syntax (`.mdx` posts) |
+| bussproofs `prooftree` | Stacked `\frac`, optionally in `gathered` for several rules |
+| `\label` / `\eqref` | `\tag{1.1}` on the equation and "equation (1.1)" in the text |
+| `\DeclareMathOperator`, preamble `\newcommand` | A site-wide macro in `astro.config.mjs`, or `\operatorname{…}` inline |
+| `multline` | `split` or `aligned` |
+| siunitx `\SI`, `\si` | `3\,\text{m}` |
+| `\cancelto` | `\cancel` with a note |
+| `\newcommand` redefining a built-in (`\R` already exists) | `\renewcommand`, or a different name |
+
+To check a command before using it:
+
+```sh
+node -e "require('katex').renderToString(String.raw\`\YOUR{command}\`, {throwOnError: true, displayMode: true})"
 ```
 
-### Common LaTeX Commands
+An error names the undefined control sequence. `npm run verify` catches any
+that reach a built page.
 
-**Greek Letters:**
-- `\alpha, \beta, \gamma, \Delta, \Omega`
-- `\pi, \theta, \phi, \lambda, \mu`
+## Layout on small screens
 
-**Operators:**
-- `\sum, \prod, \int, \lim`
-- `\frac{a}{b}` for fractions
-- `\sqrt{x}` or `\sqrt[n]{x}` for roots
-
-**Calculus:**
-- `\frac{d}{dx}`, `\frac{\partial}{\partial x}`
-- `\int_{a}^{b}`, `\oint`, `\iint`
-
-**Linear Algebra:**
-```latex
-$$
-\begin{bmatrix}
-a & b \\
-c & d
-\end{bmatrix}
-$$
-```
-
-**Environments:**
-```latex
-$$
-\begin{align}
-x + y &= 5 \\
-2x - y &= 1
-\end{align}
-$$
-```
-
-## Code Blocks
-
-Use triple backticks with language name:
-
-````markdown
-```python
-def hello():
-    print("Hello, World!")
-```
-````
-
-Supported languages: python, javascript, ruby, java, c, cpp, rust, go, bash, sql, and many more.
-
-## Images
-
-### Markdown Syntax
-```markdown
-![Alt text](/assets/img/your-image.png)
-```
-
-### HTML for More Control
-```html
-<img src="/assets/img/your-image.png" 
-     alt="Description" 
-     style="max-width: 600px; display: block; margin: 0 auto;">
-```
-
-### Image Placement
-Store images in `/docs/assets/img/` directory.
-
-## Creating a New Post
-
-### Published Posts
-1. Create a file in `docs/_posts/` with format: `YYYY-MM-DD-title.markdown`
-2. Add frontmatter:
-```yaml
----
-layout: post
-title: "Your Post Title"
-date: 2025-10-25 12:00:00 -0700
-categories: math calculus
----
-```
-3. Write your content with LaTeX, code, and images!
-
-### Draft Posts
-1. Create a file in `docs/_drafts/` with just the title: `title.markdown` (no date)
-2. Add frontmatter (no date needed):
-```yaml
----
-layout: post
-title: "Work in Progress Title"
-categories: math
----
-```
-3. View drafts locally with: `bundle exec jekyll serve --drafts`
-4. Drafts are automatically excluded from production builds!
-
-## Tips
-
-- **Escape characters**: Use `\` to escape special characters
-- **Test rendering**: Check your post locally before publishing
-- **Complex equations**: For very long equations, consider breaking them up
-- **Performance**: MathJax renders on page load, so many equations may slow down the page
-
-## Example Post Structure
-
-```markdown
----
-layout: post
-title: "The Fundamental Theorem of Calculus"
-date: 2025-10-25
-categories: math calculus
----
-
-The fundamental theorem of calculus states that if $f$ is continuous on $[a,b]$, then:
-
-$$
-\int_{a}^{b} f(x) dx = F(b) - F(a)
-$$
-
-where $F$ is an antiderivative of $f$.
-
-## Proof
-
-[Your proof here with more math...]
-
-## Example
-
-Here's a Python implementation:
-
-```python
-def integrate(f, a, b, n=1000):
-    # Numerical integration using trapezoidal rule
-    dx = (b - a) / n
-    return dx * sum(f(a + i*dx) for i in range(n))
-```
-
-[More content...]
-```
-
-## Resources
-
-- [MathJax Documentation](https://docs.mathjax.org/)
-- [LaTeX Math Symbols](https://www.overleaf.com/learn/latex/List_of_Greek_letters_and_math_symbols)
-- [Kramdown Syntax](https://kramdown.gettalong.org/syntax.html)
-
+- Display equations wider than the column scroll sideways inside their own box.
+- Inline maths can't wrap inside one `$…$`. Write a long inline list as several
+  `$…$` separated by commas.
+- Stack wide groups (several inference rules, a long chain of equalities) with
+  `gathered` or `aligned` rather than `\qquad` on one line.

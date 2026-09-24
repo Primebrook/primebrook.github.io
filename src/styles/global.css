@@ -140,6 +140,8 @@ main {
 .prose .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.25rem 4px; }
 
 @media (max-width: 34rem) {
+  /* Tables scroll sideways in their own box rather than widening the page. */
+  .prose table { display: block; overflow-x: auto; }
   .post-header h1 { font-size: 2rem; }
   .post-list li { flex-wrap: wrap; gap: 0.25rem 1rem; }
   .post-list .read { display: none; }
@@ -170,4 +172,5 @@ main {
 .prose table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1.5rem 0; }
 .prose th, .prose td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 .prose th { font-weight: 700; }
+.prose td code { overflow-wrap: anywhere; }
 .prose .footnotes { font-size: 0.85rem; color: var(--muted); }

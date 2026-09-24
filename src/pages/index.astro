@@ -1,9 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
 import { SITE } from '../site';
-import { getPosts, minutesRead } from '../lib/posts';
+import { getListedPosts, minutesRead } from '../lib/posts';
 
-const posts = await getPosts();
+const posts = await getListedPosts();
 // "15 Sep": en-GB abbreviates September to "Sept", so build it from parts.
 const day = new Intl.DateTimeFormat('en-GB', { day: '2-digit' });
 const month = new Intl.DateTimeFormat('en-US', { month: 'short' });
