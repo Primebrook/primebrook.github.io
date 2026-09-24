@@ -1,0 +1,36 @@
+---
+// Algorithms in LaTeX `algorithmic` syntax (\PROCEDURE, \IF, \STATE, …),
+// rendered to HTML at build time by pseudocode.js, which uses KaTeX for the
+// maths inside. KaTeX itself has no `algorithmic` environment.
+import 'pseudocode/build/pseudocode.min.css';
+import pseudocode from 'pseudocode';
+
+interface Props {
+  code: string;
+  number?: number;
+  lineNumbers?: boolean;
+}
+
+const { code, number = 1, lineNumbers = true } = Astro.props;
+const html = pseudocode.renderToString(code, {
+  lineNumber: lineNumbers,
+  captionCount: number - 1,
+  noEnd: false,
+});
+---
+
+<div class="pseudocode" set:html={html} />
+
+<style>
+  .pseudocode {
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+  .pseudocode :global(.ps-root) {
+    font-family: inherit;
+    font-size: 0.95em;
+  }
+  .pseudocode :global(.ps-algorithm) {
+    border-color: var(--text);
+  }
+</style>

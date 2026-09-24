@@ -28,5 +28,18 @@ Maths uses the same syntax as Obsidian: `$…$` inline, `$$…$$` display, and
 one-line `$$…$$` is display too. See `MATH_REFERENCE.md`. Obsidian
 `[[wikilinks]]` are not converted, so turn them into normal links first.
 
+A post that needs diagrams or animation is `.mdx` instead, which lets it
+import components from `src/components/`:
+
+| Component | For |
+| --- | --- |
+| `Pseudocode` | algorithms in LaTeX `algorithmic` syntax, rendered at build time |
+| `Mermaid` | flowcharts and sequence diagrams written as text |
+| `HashingAnimation` | an example animated SVG diagram, to copy for new ones |
+
+`src/content/posts/test-post.mdx` exercises all of it, and lists what KaTeX
+doesn't support (TikZ, bussproofs, `\label`/`\eqref`, …) with workarounds.
+Site-wide maths macros live in `astro.config.mjs`.
+
 `drafts/` holds the old Jekyll drafts and `old_blogs/` the 2023 posts. Neither
 is built.

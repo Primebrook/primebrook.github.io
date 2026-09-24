@@ -138,3 +138,30 @@ main {
   .post-list li { flex-wrap: wrap; gap: 0.25rem 1rem; }
   .post-list .read { display: none; }
 }
+
+/* Code highlighting: Shiki emits both themes; pick one per colour scheme. */
+.astro-code { border: 1px solid var(--rule); }
+@media (prefers-color-scheme: dark) {
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+/* Callouts */
+.callout {
+  margin: 0 0 2.5rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-left-width: 4px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-size: 0.95rem;
+}
+.callout strong { color: var(--accent); }
+
+.prose table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1.5rem 0; }
+.prose th, .prose td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.prose th { font-weight: 700; }
+.prose .footnotes { font-size: 0.85rem; color: var(--muted); }

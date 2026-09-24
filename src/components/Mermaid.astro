@@ -1,0 +1,42 @@
+---
+// A Mermaid diagram, written as text and rendered in the browser. Mermaid is
+// loaded only on pages that use this component.
+interface Props {
+  code: string;
+  caption?: string;
+}
+
+const { code, caption } = Astro.props;
+---
+
+<figure class="mermaid-figure">
+  <pre class="mermaid">{code.trim()}</pre>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const { default: mermaid } = await import('mermaid');
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: dark ? 'dark' : 'neutral',
+    fontFamily: 'Mulish, system-ui, sans-serif',
+  });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+
+<style>
+  .mermaid-figure {
+    margin: 2rem 0;
+    text-align: center;
+  }
+  .mermaid {
+    background: none;
+    overflow-x: auto;
+  }
+  figcaption {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+</style>

@@ -1,0 +1,226 @@
+---
+// Keys hashed into a table of m buckets with h(k) = k mod m; collisions chain
+// upwards. Hand-written SVG stepped by a small script, the same technique as
+// the diagrams on kingori.co. Plays once when scrolled into view, then on Replay.
+interface Props {
+  keys?: number[];
+  buckets?: number;
+}
+
+const { keys = [10, 22, 31, 4, 15, 20, 38], buckets = 7 } = Astro.props;
+
+const width = 640;
+const slot = 76;
+const left = (width - slot * buckets) / 2;
+const floor = 262;
+---
+
+<figure class="hash-anim" data-keys={JSON.stringify(keys)} data-buckets={buckets}>
+  <svg viewBox={`0 0 ${width} 320`} role="img" aria-labelledby="hash-anim-title">
+    <title id="hash-anim-title">
+      Keys {keys.join(', ')} inserted into a hash table of {buckets} buckets using h(k) = k mod {buckets},
+      with colliding keys chained in the same bucket.
+    </title>
+
+    <text class="formula" x={width / 2} y="30" text-anchor="middle">h(k) = k mod {buckets}</text>
+
+    {
+      Array.from({ length: buckets }, (_, i) => (
+        <g class="bucket" data-bucket={i}>
+          <rect x={left + i * slot + 6} y="92" width={slot - 12} height={floor - 92 + 8} rx="8" />
+          <text class="index" x={left + i * slot + slot / 2} y={floor + 36} text-anchor="middle">
+            {i}
+          </text>
+        </g>
+      ))
+    }
+
+    <g class="tokens"></g>
+  </svg>
+
+  <div class="controls">
+    <span class="status" aria-live="polite">Ready to insert {keys.length} keys</span>
+    <button type="button" data-replay>Replay</button>
+  </div>
+</figure>
+
+<script>
+  const SVG = 'http://www.w3.org/2000/svg';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+
+  function tween(el: SVGGElement, from: [number, number], to: [number, number], ms: number) {
+    return new Promise<void>((resolve) => {
+      const start = performance.now();
+      const frame = (now: number) => {
+        const t = Math.min(1, (now - start) / ms);
+        const e = ease(t);
+        const x = from[0] + (to[0] - from[0]) * e;
+        const y = from[1] + (to[1] - from[1]) * e;
+        el.setAttribute('transform', `translate(${x} ${y})`);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function setup(figure: HTMLElement) {
+    const keys: number[] = JSON.parse(figure.dataset.keys!);
+    const m = Number(figure.dataset.buckets);
+    const svg = figure.querySelector('svg')!;
+    const layer = figure.querySelector<SVGGElement>('.tokens')!;
+    const status = figure.querySelector<HTMLElement>('.status')!;
+    const button = figure.querySelector<HTMLButtonElement>('[data-replay]')!;
+    const buckets = [...figure.querySelectorAll<SVGGElement>('.bucket')];
+
+    const width = svg.viewBox.baseVal.width;
+    const slot = 76;
+    const left = (width - slot * m) / 2;
+    const floor = 262;
+    const tokenHeight = 30;
+    let run = 0;
+
+    function token(key: number) {
+      const g = document.createElementNS(SVG, 'g');
+      g.classList.add('token');
+      const rect = document.createElementNS(SVG, 'rect');
+      Object.entries({ x: -26, y: -tokenHeight / 2, width: 52, height: tokenHeight - 4, rx: 6 })
+        .forEach(([k, v]) => rect.setAttribute(k, String(v)));
+      const text = document.createElementNS(SVG, 'text');
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('y', '4');
+      text.textContent = String(key);
+      g.append(rect, text);
+      layer.append(g);
+      return g;
+    }
+
+    async function play() {
+      const id = ++run;
+      layer.replaceChildren();
+      buckets.forEach((b) => b.classList.remove('hit', 'collision'));
+      const depth = new Array(m).fill(0);
+      button.disabled = true;
+
+      for (const key of keys) {
+        if (id !== run) return;
+        const b = key % m;
+        const collision = depth[b] > 0;
+        const target: [number, number] = [left + b * slot + slot / 2, floor - depth[b] * tokenHeight - 4];
+        depth[b] += 1;
+
+        const g = token(key);
+        const start: [number, number] = [width / 2, 62];
+        g.setAttribute('transform', `translate(${start[0]} ${start[1]})`);
+        status.textContent = `h(${key}) = ${key} mod ${m} = ${b}`;
+
+        if (reduceMotion) {
+          g.setAttribute('transform', `translate(${target[0]} ${target[1]})`);
+        } else {
+          await sleep(550);
+          buckets[b].classList.add('hit');
+          await tween(g, start, [target[0], 62], 450);
+          await tween(g, [target[0], 62], target, 500);
+        }
+
+        if (collision) {
+          buckets[b].classList.add('collision');
+          status.textContent = `h(${key}) = ${b}: collision, chained in bucket ${b}`;
+        }
+        if (!reduceMotion) await sleep(collision ? 900 : 350);
+        buckets[b].classList.remove('hit');
+      }
+
+      const chained = depth.filter((d) => d > 1).reduce((n, d) => n + d - 1, 0);
+      status.textContent = `${keys.length} keys, ${m} buckets, ${chained} collisions`;
+      button.disabled = false;
+    }
+
+    button.addEventListener('click', play);
+
+    new IntersectionObserver((entries, observer) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        observer.disconnect();
+        play();
+      }
+    }, { threshold: 0.5 }).observe(figure);
+  }
+
+  document.querySelectorAll<HTMLElement>('.hash-anim').forEach(setup);
+</script>
+
+<style>
+  .hash-anim {
+    margin: 2rem 0;
+    padding: 1rem 1rem 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: inherit;
+  }
+  .formula {
+    fill: var(--muted);
+    font-size: 15px;
+  }
+  .bucket rect {
+    fill: color-mix(in srgb, var(--text) 4%, transparent);
+    stroke: var(--rule);
+    stroke-width: 1.5;
+    transition: stroke 200ms, fill 200ms;
+  }
+  .bucket.hit rect {
+    stroke: var(--muted);
+  }
+  .bucket.collision rect {
+    stroke: var(--accent);
+    fill: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .index {
+    fill: var(--muted);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .hash-anim :global(.token rect) {
+    fill: var(--bg);
+    stroke: var(--text);
+    stroke-width: 1.5;
+  }
+  .hash-anim :global(.token text) {
+    fill: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  button {
+    font: inherit;
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) {
+    border-color: var(--text);
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+</style>
