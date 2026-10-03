@@ -169,6 +169,40 @@ main {
 }
 .callout strong { color: var(--accent); }
 
+/* Collapsible aside: <details class="aside"><summary>…</summary>…</details>.
+   For detours the main text must read fine without. */
+.aside {
+  margin: 1.75rem 0;
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+.aside summary {
+  cursor: pointer;
+  position: relative;
+  padding: 0.75rem 1.1rem 0.75rem calc(1.1rem + 1.1em);
+  font-weight: 600;
+  list-style: none;
+}
+.aside summary::-webkit-details-marker { display: none; }
+.aside summary::before {
+  content: '▸';
+  position: absolute;
+  left: 1.1rem;
+  top: 0.75rem;
+  width: 1em;
+  text-align: center;
+  color: var(--accent);
+  transition: transform 150ms;
+}
+.aside[open] summary::before { transform: rotate(90deg); }
+.aside > :not(summary) { margin-left: 1.1rem; margin-right: 1.1rem; }
+.aside > :last-child { margin-bottom: 1rem; }
+@media (prefers-reduced-motion: reduce) {
+  .aside summary::before { transition: none; }
+}
+
 .prose table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1.5rem 0; }
 .prose th, .prose td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 .prose th { font-weight: 700; }
