@@ -7,9 +7,12 @@
 interface Props {
   keys?: number[];
   slots?: number;
+  /** Shown in bold before the caption, e.g. "Fig 1." */
+  label?: string;
+  caption?: string;
 }
 
-const { keys = [12, 7, 25, 30, 41, 18, 3], slots = 8 } = Astro.props;
+const { keys = [12, 7, 25, 30, 41, 18, 3], slots = 8, label, caption } = Astro.props;
 
 const row = 40;
 const top = 66;
@@ -37,54 +40,63 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
   data-slots={slots}
   data-geometry={JSON.stringify({ width, row, top, rows, keyX, hashX, cellX, cell, token, midY })}
 >
-  <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId}>
-    <title id={titleId}>
-      Keys {keys.join(', ')} pass one at a time through the hash function h(x) = x mod {slots}, which gives
-      each an index into an array of {slots} slots. Keys that get the same index collide and are chained in
-      the same slot.
-    </title>
-    <defs>
-      <marker id={`${titleId}-arrow`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
-        <path class="arrowhead" d="M0 0 L8 4 L0 8 Z" />
-      </marker>
-    </defs>
+  <div class="frame">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId}>
+      <title id={titleId}>
+        Keys {keys.join(', ')} pass one at a time through the hash function h(x) = x mod {slots}, which gives
+        each an index into an array of {slots} slots. Keys that get the same index collide and are chained in
+        the same slot.
+      </title>
+      <defs>
+        <marker id={`${titleId}-arrow`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+          <path class="arrowhead" d="M0 0 L8 4 L0 8 Z" />
+        </marker>
+      </defs>
 
-    <text class="formula" x={width / 2} y="22" text-anchor="middle">h(x) = x mod {slots}</text>
+      <text class="formula" x={width / 2} y="22" text-anchor="middle">h(x) = x mod {slots}</text>
 
-    <text class="caption" x={keyX} y={top - 14} text-anchor="middle">keys</text>
-    <text class="caption" x={cellX} y={top - 14} text-anchor="middle">array</text>
+      <text class="caption" x={keyX} y={top - 14} text-anchor="middle">keys</text>
+      <text class="caption" x={cellX} y={top - 14} text-anchor="middle">array</text>
 
-    {keys.map((_, i) => (
-      <rect class="key-slot" x={keyX - token.w / 2} y={keyY(i) - token.h / 2} width={token.w} height={token.h} rx="6" />
-    ))}
+      {keys.map((_, i) => (
+        <rect class="key-slot" x={keyX - token.w / 2} y={keyY(i) - token.h / 2} width={token.w} height={token.h} rx="6" />
+      ))}
 
-    <line class="flow" x1={keyX + token.w / 2 + 8} y1={midY} x2={hashX - 32} y2={midY} marker-end={`url(#${titleId}-arrow)`} />
-    <line class="flow" x1={hashX + 32} y1={midY} x2={cellX - cell.w / 2 - 28} y2={midY} marker-end={`url(#${titleId}-arrow)`} />
+      <line class="flow" x1={keyX + token.w / 2 + 8} y1={midY} x2={hashX - 32} y2={midY} marker-end={`url(#${titleId}-arrow)`} />
+      <line class="flow" x1={hashX + 32} y1={midY} x2={cellX - cell.w / 2 - 28} y2={midY} marker-end={`url(#${titleId}-arrow)`} />
 
-    <g class="hash">
-      <rect x={hashX - 28} y={midY - 28} width="56" height="56" rx="10" />
-      <text class="hash-label" x={hashX} y={midY} text-anchor="middle" dy="0.35em">h</text>
-    </g>
+      <g class="hash">
+        <rect x={hashX - 28} y={midY - 28} width="56" height="56" rx="10" />
+        <text class="hash-label" x={hashX} y={midY} text-anchor="middle" dy="0.35em">h</text>
+      </g>
 
-    {
-      Array.from({ length: slots }, (_, i) => (
-        <g class="slot" data-slot={i}>
-          <line class="chain" x1={cellX} y1={slotY(i)} x2={cellX} y2={slotY(i)} />
-          <rect x={cellX - cell.w / 2} y={slotY(i) - cell.h / 2} width={cell.w} height={cell.h} rx="6" />
-          <text class="index" x={cellX - cell.w / 2 - 10} y={slotY(i)} text-anchor="end" dy="0.35em">
-            {i}
-          </text>
-        </g>
-      ))
-    }
+      {
+        Array.from({ length: slots }, (_, i) => (
+          <g class="slot" data-slot={i}>
+            <line class="chain" x1={cellX} y1={slotY(i)} x2={cellX} y2={slotY(i)} />
+            <rect x={cellX - cell.w / 2} y={slotY(i) - cell.h / 2} width={cell.w} height={cell.h} rx="6" />
+            <text class="index" x={cellX - cell.w / 2 - 10} y={slotY(i)} text-anchor="end" dy="0.35em">
+              {i}
+            </text>
+          </g>
+        ))
+      }
 
-    <g class="keys"></g>
-  </svg>
+      <g class="keys"></g>
+    </svg>
 
-  <div class="controls">
-    <span class="status" aria-live="polite">Ready to hash {keys.length} keys into {slots} slots</span>
-    <button type="button" data-replay>Replay</button>
+    <div class="controls">
+      <span class="status" aria-live="polite">Ready to hash {keys.length} keys into {slots} slots</span>
+      <button type="button" data-replay>Replay</button>
+    </div>
   </div>
+  {
+    (label || caption) && (
+      <figcaption>
+        {label && <strong>{label}</strong>} {caption}
+      </figcaption>
+    )
+  }
 </figure>
 
 <script>
@@ -220,6 +232,8 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
 <style>
   .hash-map {
     margin: 2rem 0;
+  }
+  .frame {
     padding: 1rem 1rem 0.75rem;
     border: 1px solid var(--rule);
     border-radius: 10px;
@@ -314,6 +328,15 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
     font-size: 16px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  figcaption strong {
+    color: var(--text);
   }
   .controls {
     display: flex;
