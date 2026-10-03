@@ -50,7 +50,8 @@ URL, left off the home page) and kept as a working example to copy from.
 | Path | What |
 | --- | --- |
 | `src/content/posts/` | posts (`.md`, `.mdx`) |
-| `src/components/` | `Pseudocode`, `Mermaid`, `HashingAnimation` |
+| `src/components/` | `Pseudocode`, `Mermaid`, `HashingAnimation`, `HashMapping` |
+| `src/lab/` | figures in progress, one page each at `/lab/<name>/` (dev only, never deployed) |
 | `src/assets/posts/` | images, one folder per post |
 | `src/pages/`, `src/layouts/` | home page, about page, post template |
 | `src/styles/global.css` | all styling, light and dark |

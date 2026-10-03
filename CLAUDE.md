@@ -17,6 +17,7 @@ you changed.
 | An example of every feature, working | `src/content/posts/test-post.mdx`, live (unlisted) at `/writing/test-post/` |
 | What LaTeX works, and what to do instead | `MATH_REFERENCE.md` |
 | Commands, briefly | `README.md` |
+| A figure being designed, on its own page | `src/lab/<name>.mdx`, at `/lab/<name>/` (dev only) |
 
 **Copy from the test post rather than inventing syntax.** It's kept permanently
 for this reason: every construct in it has been checked in a browser. When a
@@ -165,6 +166,16 @@ structure:
   status line narrating the steps. `npm run inspect` prints that status line,
   which is how to check an animation ran to the end without watching it.
 - `viewBox` plus `width: 100%` so it scales down on phones. Check at 375px.
+
+**Iterate in the lab, not in a post.** Brook describes a figure; you build the
+component and give it a page in `src/lab/<name>.mdx` (frontmatter `title` and
+optional `description`, then an import and the component, with a line of prose
+either side). With `npm run dev` running, Brook keeps `/lab/<name>/` open and
+sees each edit reload; `/lab/` lists every lab page. Lab pages build only in
+dev and under `verify:drafts`, so they never deploy (`src/pages/lab/[...name].astro`).
+To check one: `npm run verify:drafts`, then `npm run inspect -- /lab/<name>/`.
+Leave the test post alone while iterating; add the component to it once it's
+finished.
 
 Prefer a static image or Mermaid when nothing needs to move. An animation is
 worth it when the order of events is the point.

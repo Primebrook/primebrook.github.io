@@ -2,9 +2,9 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export type Post = CollectionEntry<'posts'>;
 
-// `npm run verify:drafts` sets this so drafts can be built and checked locally.
-// CI never sets it, so drafts are never deployed.
-const includeDrafts = import.meta.env.DEV || process.env.INCLUDE_DRAFTS === '1';
+// `npm run verify:drafts` sets this so drafts (and the /lab/ pages) can be built
+// and checked locally. CI never sets it, so neither is ever deployed.
+export const includeDrafts = import.meta.env.DEV || process.env.INCLUDE_DRAFTS === '1';
 
 /** Every post that gets a page: all but drafts, unless drafts are included. */
 export async function getPosts(): Promise<Post[]> {

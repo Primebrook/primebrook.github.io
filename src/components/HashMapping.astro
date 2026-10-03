@@ -1,0 +1,343 @@
+---
+// What hashing is: keys flowing left to right through h(x) = x mod m into an
+// array. The keys wait in a column, pass through h, and land in the slot whose
+// index h gave them; a key that collides chains off to the right of its slot.
+// The default keys give exactly one collision (41 joins 25 in slot 1). Built like
+// HashingAnimation: static parts in the markup, moving keys made by the script.
+interface Props {
+  keys?: number[];
+  slots?: number;
+}
+
+const { keys = [12, 7, 25, 30, 41, 18, 3], slots = 8 } = Astro.props;
+
+const row = 40;
+const top = 66;
+const rows = Math.max(slots, keys.length);
+const height = top + rows * row + 14;
+const midY = top + (rows * row) / 2;
+const keyX = 30;
+const hashX = 110;
+const cellX = 214;
+const cell = { w: 44, h: row - 8 };
+const token = { w: 34, h: row - 12 };
+// Wide enough for the longest chain these keys make, and no wider, so the
+// figure scales down as little as possible on a phone.
+const counts = new Array(slots).fill(0);
+keys.forEach((k) => counts[k % slots]++);
+const width = cellX + (Math.max(...counts) - 1) * (token.w + 10) + token.w / 2 + 24;
+const slotY = (i: number) => top + (rows - slots) * (row / 2) + i * row + row / 2;
+const keyY = (i: number) => top + (rows - keys.length) * (row / 2) + i * row + row / 2;
+const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<figure
+  class="hash-map"
+  data-keys={JSON.stringify(keys)}
+  data-slots={slots}
+  data-geometry={JSON.stringify({ width, row, top, rows, keyX, hashX, cellX, cell, token, midY })}
+>
+  <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId}>
+    <title id={titleId}>
+      Keys {keys.join(', ')} pass one at a time through the hash function h(x) = x mod {slots}, which gives
+      each an index into an array of {slots} slots. Keys that get the same index collide and are chained in
+      the same slot.
+    </title>
+    <defs>
+      <marker id={`${titleId}-arrow`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+        <path class="arrowhead" d="M0 0 L8 4 L0 8 Z" />
+      </marker>
+    </defs>
+
+    <text class="formula" x={width / 2} y="22" text-anchor="middle">h(x) = x mod {slots}</text>
+
+    <text class="caption" x={keyX} y={top - 14} text-anchor="middle">keys</text>
+    <text class="caption" x={cellX} y={top - 14} text-anchor="middle">array</text>
+
+    {keys.map((_, i) => (
+      <rect class="key-slot" x={keyX - token.w / 2} y={keyY(i) - token.h / 2} width={token.w} height={token.h} rx="6" />
+    ))}
+
+    <line class="flow" x1={keyX + token.w / 2 + 8} y1={midY} x2={hashX - 32} y2={midY} marker-end={`url(#${titleId}-arrow)`} />
+    <line class="flow" x1={hashX + 32} y1={midY} x2={cellX - cell.w / 2 - 28} y2={midY} marker-end={`url(#${titleId}-arrow)`} />
+
+    <g class="hash">
+      <rect x={hashX - 28} y={midY - 28} width="56" height="56" rx="10" />
+      <text class="hash-label" x={hashX} y={midY} text-anchor="middle" dy="0.35em">h</text>
+    </g>
+
+    {
+      Array.from({ length: slots }, (_, i) => (
+        <g class="slot" data-slot={i}>
+          <line class="chain" x1={cellX} y1={slotY(i)} x2={cellX} y2={slotY(i)} />
+          <rect x={cellX - cell.w / 2} y={slotY(i) - cell.h / 2} width={cell.w} height={cell.h} rx="6" />
+          <text class="index" x={cellX - cell.w / 2 - 10} y={slotY(i)} text-anchor="end" dy="0.35em">
+            {i}
+          </text>
+        </g>
+      ))
+    }
+
+    <g class="keys"></g>
+  </svg>
+
+  <div class="controls">
+    <span class="status" aria-live="polite">Ready to hash {keys.length} keys into {slots} slots</span>
+    <button type="button" data-replay>Replay</button>
+  </div>
+</figure>
+
+<script>
+  const SVG = 'http://www.w3.org/2000/svg';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  type Point = [number, number];
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+  const place = (el: SVGElement, [x, y]: Point) => el.setAttribute('transform', `translate(${x} ${y})`);
+
+  function tween(el: SVGElement, from: Point, to: Point, ms: number) {
+    return new Promise<void>((resolve) => {
+      const start = performance.now();
+      const frame = (now: number) => {
+        const t = Math.min(1, (now - start) / ms);
+        const e = ease(t);
+        place(el, [from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e]);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function setup(figure: HTMLElement) {
+    const keys: number[] = JSON.parse(figure.dataset.keys!);
+    const m = Number(figure.dataset.slots);
+    const g = JSON.parse(figure.dataset.geometry!);
+    const layer = figure.querySelector<SVGGElement>('.keys')!;
+    const hash = figure.querySelector<SVGGElement>('.hash')!;
+    const status = figure.querySelector<HTMLElement>('.status')!;
+    const button = figure.querySelector<HTMLButtonElement>('[data-replay]')!;
+    const slots = [...figure.querySelectorAll<SVGGElement>('.slot')];
+    const chains = slots.map((s) => s.querySelector<SVGLineElement>('.chain')!);
+
+    const keyY = (i: number) => g.top + (g.rows - keys.length) * (g.row / 2) + i * g.row + g.row / 2;
+    const slotY = (i: number) => g.top + (g.rows - m) * (g.row / 2) + i * g.row + g.row / 2;
+    let run = 0;
+
+    function makeToken(key: number) {
+      const el = document.createElementNS(SVG, 'g');
+      el.classList.add('token');
+      const rect = document.createElementNS(SVG, 'rect');
+      Object.entries({ x: -g.token.w / 2, y: -g.token.h / 2, width: g.token.w, height: g.token.h, rx: 6 })
+        .forEach(([k, v]) => rect.setAttribute(k, String(v)));
+      const text = document.createElementNS(SVG, 'text');
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dy', '0.35em');
+      text.textContent = String(key);
+      el.append(rect, text);
+      layer.append(el);
+      return el;
+    }
+
+    const h = (x: number) => x % m;
+
+    async function play() {
+      const id = ++run;
+      button.disabled = true;
+      slots.forEach((s) => s.classList.remove('hit', 'collision'));
+      hash.classList.remove('busy');
+      chains.forEach((c) => c.setAttribute('x2', String(g.cellX)));
+
+      // Space each chain so the longest one still fits inside the figure.
+      const counts = new Array(m).fill(0);
+      keys.forEach((k) => counts[h(k)]++);
+      const room = g.width - 4 - g.token.w / 2 - g.cellX;
+      const spacing = Math.min(g.token.w + 10, room / Math.max(1, Math.max(...counts) - 1));
+
+      layer.replaceChildren();
+      const tokens = keys.map((key, i) => {
+        const el = makeToken(key);
+        place(el, [g.keyX, keyY(i)]);
+        return el;
+      });
+      const depth = new Array(m).fill(0);
+
+      for (const [i, key] of keys.entries()) {
+        if (id !== run) return;
+        const s = h(key);
+        const target: Point = [g.cellX + depth[s] * spacing, slotY(s)];
+        const collision = depth[s] > 0;
+        depth[s] += 1;
+
+        if (reduceMotion) {
+          place(tokens[i], target);
+        } else {
+          tokens[i].classList.add('active');
+          status.textContent = `h(${key}) = ?`;
+          await tween(tokens[i], [g.keyX, keyY(i)], [g.hashX, g.midY], 420);
+          if (id !== run) return;
+          hash.classList.add('busy');
+          status.textContent = `h(${key}) = ${s}`;
+          slots[s].classList.add('hit');
+          await sleep(220);
+          hash.classList.remove('busy');
+          await tween(tokens[i], [g.hashX, g.midY], target, 480);
+          if (id !== run) return;
+          tokens[i].classList.remove('active');
+        }
+
+        chains[s].setAttribute('x2', String(target[0]));
+        if (collision) {
+          slots[s].classList.add('collision');
+          status.textContent = `h(${key}) = ${s}: collision, slot ${s} now holds ${depth[s]}`;
+        } else {
+          status.textContent = `h(${key}) = ${s}`;
+        }
+        if (!reduceMotion) await sleep(collision ? 320 : 160);
+        slots[s].classList.remove('hit');
+      }
+
+      const collisions = depth.reduce((n, d) => n + Math.max(0, d - 1), 0);
+      status.textContent = `${keys.length} keys, ${m} slots, ${collisions} ${collisions === 1 ? 'collision' : 'collisions'}`;
+      button.disabled = false;
+    }
+
+    button.addEventListener('click', play);
+
+    new IntersectionObserver((entries, observer) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        observer.disconnect();
+        play();
+      }
+    }, { threshold: 0.5 }).observe(figure);
+  }
+
+  document.querySelectorAll<HTMLElement>('.hash-map').forEach(setup);
+</script>
+
+<style>
+  .hash-map {
+    margin: 2rem 0;
+    padding: 1rem 1rem 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    max-width: 24rem;
+    height: auto;
+    margin: 0 auto;
+    font-family: inherit;
+  }
+  .formula {
+    fill: var(--muted);
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+  .caption {
+    fill: var(--muted);
+    font-size: 13px;
+  }
+  .key-slot {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .flow {
+    stroke: var(--rule);
+    stroke-width: 1.5;
+  }
+  .arrowhead {
+    fill: var(--rule);
+  }
+  .hash rect {
+    fill: color-mix(in srgb, var(--text) 4%, transparent);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    transition: stroke 150ms, fill 150ms;
+  }
+  .hash.busy rect {
+    stroke: var(--accent);
+    fill: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .hash-label {
+    fill: var(--text);
+    font-size: 24px;
+    font-style: italic;
+  }
+  .slot rect {
+    fill: color-mix(in srgb, var(--text) 4%, transparent);
+    stroke: var(--rule);
+    stroke-width: 1.5;
+    transition: stroke 200ms, fill 200ms;
+  }
+  .slot .chain {
+    stroke: var(--rule);
+    stroke-width: 1.5;
+  }
+  .slot.hit rect {
+    stroke: var(--muted);
+  }
+  .slot.collision rect {
+    stroke: var(--accent);
+    fill: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .slot.collision .chain {
+    stroke: var(--accent);
+  }
+  .index {
+    fill: var(--muted);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    transition: fill 150ms;
+  }
+  .slot.hit .index {
+    fill: var(--accent);
+    font-weight: 700;
+  }
+  .hash-map :global(.token rect) {
+    fill: var(--bg);
+    stroke: var(--text);
+    stroke-width: 1.5;
+    transition: stroke 150ms;
+  }
+  .hash-map :global(.token.active rect) {
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .hash-map :global(.token text) {
+    fill: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  button {
+    font: inherit;
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) {
+    border-color: var(--text);
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+</style>

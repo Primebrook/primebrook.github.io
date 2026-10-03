@@ -1,0 +1,49 @@
+---
+// The lab: one page per figure in progress, at /lab/<name>/, from src/lab/<name>.mdx.
+// Built only in dev and by `npm run verify:drafts`, like drafts, so it never deploys.
+import type { MDXInstance } from 'astro';
+import Base from '../../layouts/Base.astro';
+import { includeDrafts } from '../../lib/posts';
+
+type LabPage = MDXInstance<{ title: string; description?: string }>;
+
+export function getStaticPaths() {
+  if (!includeDrafts) return [];
+  const modules = import.meta.glob<LabPage>('../../lab/*.mdx', { eager: true });
+  const pages = Object.entries(modules)
+    .map(([path, page]) => ({ name: path.split('/').pop()!.replace(/\.mdx$/, ''), page }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return [
+    { params: { name: undefined }, props: { pages } },
+    ...pages.map(({ name, page }) => ({ params: { name }, props: { page } })),
+  ];
+}
+
+const { page, pages } = Astro.props as { page?: LabPage; pages?: { name: string; page: LabPage }[] };
+---
+
+<Base title={page ? `Lab: ${page.frontmatter.title}` : 'Lab'} noindex>
+  <article>
+    <header class="post-header">
+      <p class="post-meta"><a href="/lab/">Lab</a> · local only, never deployed</p>
+      <h1>{page ? page.frontmatter.title : 'Lab'}</h1>
+      {page?.frontmatter.description && <p class="post-meta">{page.frontmatter.description}</p>}
+    </header>
+    <div class="prose">
+      {
+        page ? (
+          <page.Content />
+        ) : (
+          <ul>
+            {pages!.map(({ name, page }) => (
+              <li>
+                <a href={`/lab/${name}/`}>{page.frontmatter.title}</a>
+                {page.frontmatter.description && ` (${page.frontmatter.description})`}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </article>
+</Base>
