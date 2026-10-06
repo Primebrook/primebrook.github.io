@@ -1,0 +1,377 @@
+---
+// The key property of a hash function, drawn as sets: an unbounded domain
+// (a shape bigger than the figure, fading out to the left) is transformed by h
+// into a small range of fixed size. A copy of the domain's outline flows
+// through h, shrinking and reshaping into the range, while the domain's
+// elements stream through h and pile onto the range's few points.
+// Built like HashMapping: static parts in the markup, moving parts by script.
+interface Props {
+  /** Number of points in the output space. */
+  outputs?: number;
+  /** The function's name, shown in its box and the narration. */
+  fn?: string;
+  /** Shown in bold before the caption, e.g. "Fig 1." */
+  label?: string;
+  caption?: string;
+}
+
+const { outputs = 8, fn = 'f', label, caption } = Astro.props;
+
+const width = 480;
+const height = 330;
+const N = 120; // outline samples; the domain and range use the same count so one can morph into the other
+const domain = { cx: 58, cy: 168, r: (t: number) => 192 + 24 * Math.sin(3 * t + 0.5) + 14 * Math.sin(5 * t + 1.3) };
+const range = { cx: 418, cy: 178, r: (t: number) => 40 + 3 * Math.sin(3 * t + 0.4) };
+const hash = { x: 316, y: 178 };
+
+const sample = (r: (t: number) => number) =>
+  Array.from({ length: N }, (_, i) => +r((i / N) * 2 * Math.PI).toFixed(2));
+const domainR = sample(domain.r);
+const rangeR = sample(range.r);
+const outline = (cx: number, cy: number, radii: number[]) =>
+  radii
+    .map((r, i) => {
+      const t = (i / N) * 2 * Math.PI;
+      return `${i ? 'L' : 'M'}${(cx + r * Math.cos(t)).toFixed(1)} ${(cy + r * Math.sin(t)).toFixed(1)}`;
+    })
+    .join(' ') + ' Z';
+
+// The range's points: a ring, one per output.
+const points = Array.from({ length: outputs }, (_, k) => {
+  const t = (k / outputs) * 2 * Math.PI - Math.PI / 2;
+  return [+(range.cx + 22 * Math.cos(t)).toFixed(1), +(range.cy + 22 * Math.sin(t)).toFixed(1)];
+});
+
+// Elements of the domain: seeded so the picture is the same on every build,
+// kept to the part of the domain that's inside the figure.
+let seed = 7;
+const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+const inside = (x: number, y: number) => {
+  const t = Math.atan2(y - domain.cy, x - domain.cx);
+  return Math.hypot(x - domain.cx, y - domain.cy) < domain.r(t < 0 ? t + 2 * Math.PI : t) - 8;
+};
+const dots: { x: number; y: number; to: number }[] = [];
+while (dots.length < 140) {
+  const x = 6 + random() * 280;
+  const y = 10 + random() * (height - 20);
+  if (inside(x, y)) dots.push({ x: +x.toFixed(1), y: +y.toFixed(1), to: Math.floor(random() * outputs) });
+}
+
+const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<figure
+  class="finite"
+  data-fn={fn}
+  data-geometry={JSON.stringify({ N, domain: { cx: domain.cx, cy: domain.cy }, range: { cx: range.cx, cy: range.cy }, hash, domainR, rangeR, points, dots })}
+>
+  <div class="frame">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-title`}>
+      <title id={`${id}-title`}>
+        A function {fn} drawn as sets. Its input space is a shape larger than the picture, fading out to the left to
+        show it has no bound. {fn} transforms it into its output space, a small shape holding just {outputs} values,
+        so every input lands on one of those {outputs} values.
+      </title>
+      <defs>
+        <linearGradient id={`${id}-fade-x`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="80" y2="0">
+          <stop offset="0" stop-color="black" />
+          <stop offset="1" stop-color="white" />
+        </linearGradient>
+        <linearGradient id={`${id}-fade-y`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={height}>
+          <stop offset="0" stop-color="black" />
+          <stop offset="0.1" stop-color="white" />
+          <stop offset="0.9" stop-color="white" />
+          <stop offset="1" stop-color="black" />
+        </linearGradient>
+        <mask id={`${id}-mask-x`}><rect width={width} height={height} fill={`url(#${id}-fade-x)`} /></mask>
+        <mask id={`${id}-mask-y`}><rect width={width} height={height} fill={`url(#${id}-fade-y)`} /></mask>
+      </defs>
+
+      <g mask={`url(#${id}-mask-x)`}>
+        <g class="domain" mask={`url(#${id}-mask-y)`}>
+          <path class="outline" d={outline(domain.cx, domain.cy, domainR)} />
+          {dots.map((d) => <circle class="element" cx={d.x} cy={d.y} r="2" />)}
+        </g>
+      </g>
+      <text class="caption" x="14" y="26">input space: unbounded</text>
+
+      <g class="range">
+        <path class="outline" d={outline(range.cx, range.cy, rangeR)} />
+        {points.map(([x, y]) => <circle class="point" cx={x} cy={y} r="3.2" />)}
+      </g>
+      <text class="caption" x={range.cx} y={range.cy - 74} text-anchor="middle">
+        <tspan x={range.cx}>output space:</tspan>
+        <tspan x={range.cx} dy="1.2em">{outputs} values</tspan>
+      </text>
+
+      <g class="moving"></g>
+
+      <g class="hash">
+        <rect x={hash.x - 22} y={hash.y - 22} width="44" height="44" rx="10" />
+        <text class="hash-label" x={hash.x} y={hash.y} text-anchor="middle" dy="0.35em">{fn}</text>
+      </g>
+    </svg>
+
+    <div class="controls">
+      <span class="status" aria-live="polite">The input space: every possible input</span>
+      <button type="button" data-replay>Replay</button>
+    </div>
+  </div>
+  {
+    (label || caption) && (
+      <figcaption>
+        {label && <strong>{label}</strong>} {caption}
+      </figcaption>
+    )
+  }
+</figure>
+
+<script>
+  const SVG = 'http://www.w3.org/2000/svg';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+  const clamp = (t: number) => Math.min(1, Math.max(0, t));
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+  function setup(figure: HTMLElement) {
+    const g = JSON.parse(figure.dataset.geometry!);
+    const fn = figure.dataset.fn!;
+    const layer = figure.querySelector<SVGGElement>('.moving')!;
+    const hash = figure.querySelector<SVGGElement>('.hash')!;
+    const rangeEl = figure.querySelector<SVGGElement>('.range')!;
+    const domainEl = figure.querySelector<SVGGElement>('.domain')!;
+    const points = [...figure.querySelectorAll<SVGCircleElement>('.point')];
+    const status = figure.querySelector<HTMLElement>('.status')!;
+    const button = figure.querySelector<HTMLButtonElement>('[data-replay]')!;
+
+    // Elements nearest h set off first, so the domain drains towards it.
+    const dots: { x: number; y: number; to: number }[] = [...g.dots].sort(
+      (a: { x: number }, b: { x: number }) => b.x - a.x,
+    );
+    const total = 5000;
+    const travel = 1500;
+    let run = 0;
+
+    function outline(cx: number, cy: number, radii: number[]) {
+      return (
+        radii
+          .map((r, i) => {
+            const t = (i / g.N) * 2 * Math.PI;
+            return `${i ? 'L' : 'M'}${(cx + r * Math.cos(t)).toFixed(1)} ${(cy + r * Math.sin(t)).toFixed(1)}`;
+          })
+          .join(' ') + ' Z'
+      );
+    }
+
+    // A point on the quadratic curve from a to b that bends through h.
+    function via(a: [number, number], b: [number, number], t: number): [number, number] {
+      const c = [2 * g.hash.x - (a[0] + b[0]) / 2, 2 * g.hash.y - (a[1] + b[1]) / 2];
+      return [
+        (1 - t) ** 2 * a[0] + 2 * (1 - t) * t * c[0] + t * t * b[0],
+        (1 - t) ** 2 * a[1] + 2 * (1 - t) * t * c[1] + t * t * b[1],
+      ];
+    }
+
+    function finish() {
+      layer.replaceChildren();
+      domainEl.classList.add('done');
+      rangeEl.classList.add('filled');
+      points.forEach((p) => p.classList.add('hit'));
+      status.textContent = `An unbounded input space, mapped onto an output space of ${points.length} values`;
+      button.disabled = false;
+    }
+
+    function play() {
+      const id = ++run;
+      button.disabled = true;
+      layer.replaceChildren();
+      domainEl.classList.remove('done');
+      rangeEl.classList.remove('filled');
+      points.forEach((p) => p.classList.remove('hit'));
+      if (reduceMotion) return finish();
+      domainEl.classList.add('done');
+
+      const shape = document.createElementNS(SVG, 'path');
+      shape.classList.add('morph');
+      layer.append(shape);
+      const movers = dots.map(() => {
+        const c = document.createElementNS(SVG, 'circle');
+        c.classList.add('mover');
+        c.setAttribute('r', '2');
+        layer.append(c);
+        return c;
+      });
+
+      status.textContent = `${fn} maps every input to one of the output space's values`;
+      const start = performance.now();
+      const frame = (now: number) => {
+        if (id !== run) return;
+        const elapsed = now - start;
+
+        // The outline: the domain is pulled into h, squeezed to h's size,
+        // and comes out the other side as the range.
+        const s = clamp(elapsed / total);
+        const squeezed = 18;
+        let cx: number, cy: number, radii: number[];
+        if (s < 0.5) {
+          const u = ease(s / 0.5);
+          [cx, cy] = [lerp(g.domain.cx, g.hash.x, u), lerp(g.domain.cy, g.hash.y, u)];
+          radii = g.domainR.map((r: number) => lerp(r, squeezed, u));
+        } else {
+          const u = ease((s - 0.5) / 0.5);
+          [cx, cy] = [lerp(g.hash.x, g.range.cx, u), lerp(g.hash.y, g.range.cy, u)];
+          radii = g.rangeR.map((r: number) => lerp(squeezed, r, u));
+        }
+        shape.setAttribute('d', outline(cx, cy, radii));
+        hash.classList.toggle('busy', s > 0.38 && s < 0.62);
+
+        // The elements, each through h to its point in the range.
+        dots.forEach((d, i) => {
+          const delay = (i / dots.length) * (total - travel);
+          const t = clamp((elapsed - delay) / travel);
+          const target = g.points[d.to];
+          const [x, y] = via([d.x, d.y], target, ease(t));
+          movers[i].setAttribute('cx', x.toFixed(1));
+          movers[i].setAttribute('cy', y.toFixed(1));
+          movers[i].style.opacity = t === 0 || t === 1 ? '0' : '1';
+          if (t === 1) points[d.to].classList.add('hit');
+        });
+
+        if (elapsed < total) requestAnimationFrame(frame);
+        else finish();
+      };
+      requestAnimationFrame(frame);
+    }
+
+    button.addEventListener('click', play);
+
+    new IntersectionObserver((entries, observer) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        observer.disconnect();
+        play();
+      }
+    }, { threshold: 0.5 }).observe(figure);
+  }
+
+  document.querySelectorAll<HTMLElement>('.finite').forEach(setup);
+</script>
+
+<style>
+  .finite {
+    margin: 2rem 0;
+  }
+  .frame {
+    padding: 1rem 1rem 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: auto;
+    margin: 0 auto;
+    font-family: inherit;
+  }
+  .caption {
+    fill: var(--muted);
+    font-size: 16px;
+    /* A halo in the page colour keeps labels readable over outlines and dots. */
+    stroke: var(--bg);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+    paint-order: stroke;
+  }
+  .domain .outline {
+    fill: color-mix(in srgb, var(--text) 5%, transparent);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    transition: opacity 400ms;
+  }
+  .domain .element {
+    fill: var(--muted);
+    transition: opacity 400ms;
+  }
+  .domain.done .element,
+  .domain.done .outline {
+    opacity: 0.45;
+  }
+  .range .outline {
+    fill: color-mix(in srgb, var(--text) 5%, transparent);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    transition: fill 300ms, stroke 300ms;
+  }
+  .range.filled .outline {
+    stroke: var(--accent);
+    fill: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .point {
+    fill: var(--bg);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    transition: fill 200ms, stroke 200ms;
+  }
+  .point.hit {
+    fill: var(--text);
+    stroke: var(--text);
+  }
+  .finite :global(.morph) {
+    fill: color-mix(in srgb, var(--accent) 10%, transparent);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+  .finite :global(.mover) {
+    fill: var(--accent);
+  }
+  .hash rect {
+    fill: var(--bg);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    transition: stroke 150ms, fill 150ms;
+  }
+  .hash.busy rect {
+    stroke: var(--accent);
+    fill: color-mix(in srgb, var(--accent) 10%, var(--bg));
+  }
+  .hash-label {
+    fill: var(--text);
+    font-size: 22px;
+    font-style: italic;
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  figcaption strong {
+    color: var(--text);
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  button {
+    font: inherit;
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) {
+    border-color: var(--text);
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+</style>
