@@ -6,9 +6,9 @@ draft: true
 
 import HashMapping from '../../components/HashMapping.astro';
 
-Hashing is a fundamental concept in computer science. It's a *mapping* from a set of keys to some fixed size output space, the output space indexes an array. It's used in foundational data structures like sets, hash tables (aka dictionaries) and bloom filters; it's also used in cryptography to conceal private information. Hashing relies on two core properties:
+**Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables (aka dictionaries) and bloom filters; they're also used in cryptography to conceal private information. A hash function is a *mapping* from a set of keys to some fixed size output space, the output space indexes an array. Hashing relies on two core properties:
 
-1. **Deterministic** - hash functions must map a given input to the same output, on repeated evaluation.
+1. **Deterministic** - hash functions must map a given input to the same output (every time).
 2. **Output space must have fixed size** - the arrays that get indexed by the output space have finite size in memory.
 
 with an optional third property in the case of cryptographic hash functions:
