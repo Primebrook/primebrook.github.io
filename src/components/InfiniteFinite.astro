@@ -1,0 +1,315 @@
+---
+// Two functions as graphs. Each starts as the input line itself (the x-axis)
+// and lifts into the function's graph, every point x rising to height f(x). Top: y = x² rises off the top of the plot, so its outputs
+// have no limit (infinite to infinite). Bottom: y = x mod m breaks into teeth
+// that all stay between 0 and m (infinite to finite). A bar on each output
+// axis shows the outputs in use as the line changes.
+interface Props {
+  /** Modulus for the bottom panel. */
+  m?: number;
+  /** Shown in bold before the caption, e.g. "Fig 2." */
+  label?: string;
+  caption?: string;
+}
+
+const { m = 8, label, caption } = Astro.props;
+
+const width = 520;
+const panelH = 210;
+const gap = 14;
+const height = panelH * 2 + gap;
+const plot = { left: 44, right: width - 16, top: 34, bottom: panelH - 22 };
+const panels = [
+  // Both panels share an output scale, so x mod m stays visibly low next to x².
+  { top: 0, fn: 'f(x) = x²', verdict: 'infinite → infinite', x: [-6.5, 6.5], y: [-3, 26] },
+  { top: panelH + gap, fn: `f(x) = x mod ${m}`, verdict: 'infinite → finite', x: [-m, 3 * m], y: [-3, 26] },
+];
+const sx = (p: (typeof panels)[number], u: number) =>
+  +(plot.left + ((u - p.x[0]) / (p.x[1] - p.x[0])) * (plot.right - plot.left)).toFixed(2);
+const sy = (p: (typeof panels)[number], v: number) =>
+  +(plot.bottom - ((v - p.y[0]) / (p.y[1] - p.y[0])) * (plot.bottom - plot.top)).toFixed(2);
+const id = `inf-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<figure class="inf-fin" data-m={m} data-geometry={JSON.stringify({ plot, panels: panels.map((p) => ({ x: p.x, y: p.y })) })}>
+  <div class="frame">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-title`}>
+      <title id={`${id}-title`}>
+        Two graphs, each starting as the input line along the x-axis. In the first, every point x rises to x², and the
+        line bends into a curve that runs off the top of the graph: its outputs have no limit. In the second, every
+        point rises to x mod {m}, and the line becomes teeth that all sit between 0 and {m}: its outputs are limited to
+        that range.
+      </title>
+      <defs>
+        <marker id={`${id}-arrow`} viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path class="arrowhead" d="M0 0 L8 4 L0 8 Z" />
+        </marker>
+        <marker id={`${id}-more`} viewBox="0 0 10 10" refX="2" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto">
+          <path class="more" d="M0 0 L10 5 L0 10 Z" />
+        </marker>
+        <clipPath id={`${id}-clip`}>
+          <rect x={plot.left} y={plot.top} width={plot.right - plot.left} height={plot.bottom - plot.top} />
+        </clipPath>
+      </defs>
+
+      {
+        panels.map((p, k) => (
+          <g class="panel" data-panel={k} transform={`translate(0 ${p.top})`}>
+            <text class="fn" x={plot.left} y="20">{p.fn}</text>
+            <text class="verdict" x={plot.right} y="20" text-anchor="end">{p.verdict}</text>
+
+            <line class="axis" x1={plot.left} y1={sy(p, 0)} x2={plot.right} y2={sy(p, 0)} marker-start={`url(#${id}-arrow)`} marker-end={`url(#${id}-arrow)`} />
+            <line class="axis" x1={sx(p, 0)} y1={plot.bottom} x2={sx(p, 0)} y2={plot.top} marker-start={`url(#${id}-arrow)`} marker-end={`url(#${id}-arrow)`} />
+            <text class="axis-label" x={plot.right - 2} y={sy(p, 0) + 18} text-anchor="end">input</text>
+            <text class="axis-label" x={sx(p, 0) + 8} y={plot.top + 10}>output</text>
+
+            <line class="image" data-more={`url(#${id}-more)`} x1={plot.left - 12} x2={plot.left - 12} y1={sy(p, 0)} y2={sy(p, 0)} />
+            <g clip-path={`url(#${id}-clip)`}>
+              <path class="curve" />
+              <path class="curve-more" />
+            </g>
+          </g>
+        ))
+      }
+    </svg>
+
+    <div class="controls">
+      <span class="status" aria-live="polite">Ready</span>
+      <button type="button" data-replay>Replay</button>
+    </div>
+  </div>
+  {
+    (label || caption) && (
+      <figcaption>
+        {label && <strong>{label}</strong>} {caption}
+      </figcaption>
+    )
+  }
+</figure>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+  const clamp = (t: number) => Math.min(1, Math.max(0, t));
+
+  function setup(figure: HTMLElement) {
+    const g = JSON.parse(figure.dataset.geometry!);
+    const m = Number(figure.dataset.m);
+    const panels = [...figure.querySelectorAll<SVGGElement>('.panel')];
+    const status = figure.querySelector<HTMLElement>('.status')!;
+    const button = figure.querySelector<HTMLButtonElement>('[data-replay]')!;
+    const mod = (x: number) => ((x % m) + m) % m;
+    const morph = 2200;
+    let run = 0;
+
+    // Each function, and the inputs where it breaks (the curve is drawn as
+    // separate pieces between breaks, so mod's teeth come apart cleanly).
+    // With dottedEnds, the first and last pieces are drawn as dots: x² keeps
+    // going past the top of the plot.
+    const fns = [
+      { f: (x: number) => x * x, breaks: [-4.4, 4.4], dottedEnds: true },
+      { f: mod, breaks: Array.from({ length: 4 }, (_, i) => i * m), dottedEnds: false },
+    ];
+
+    function draw(k: number, t: number) {
+      const { x, y } = g.panels[k];
+      const { plot } = g;
+      const sx = (u: number) => plot.left + ((u - x[0]) / (x[1] - x[0])) * (plot.right - plot.left);
+      // Kept to a little beyond the plot, so the clipped curve never reaches far off-figure.
+      const sy = (v: number) =>
+        Math.max(plot.top - 20, Math.min(plot.bottom + 20, plot.bottom - ((v - y[0]) / (y[1] - y[0])) * (plot.bottom - plot.top)));
+      const { f, breaks, dottedEnds } = fns[k];
+      const e = ease(t);
+      const edges = [x[0], ...breaks.filter((b: number) => b > x[0] && b < x[1]), x[1]];
+      const step = (x[1] - x[0]) / 400;
+      let lo = Infinity;
+      let hi = -Infinity;
+      const pieces = edges.slice(0, -1).map((a, i) => {
+        const b = edges[i + 1];
+        const pts: string[] = [];
+        // Stop just short of each break, where mod jumps back to 0; a
+        // continuous curve runs on to the break so its pieces meet.
+        const end = dottedEnds ? b + 1e-9 : b - 1e-9;
+        for (let u = a; dottedEnds ? u <= end : u < end; u += step) {
+          const v = f(u) * e;
+          lo = Math.min(lo, v);
+          hi = Math.max(hi, v);
+          pts.push(`${pts.length ? 'L' : 'M'}${sx(u).toFixed(1)} ${sy(v).toFixed(1)}`);
+        }
+        return pts.join(' ');
+      });
+      const panel = panels[k];
+      const last = pieces.length - 1;
+      const solid = dottedEnds ? pieces.filter((_, i) => i !== 0 && i !== last) : pieces;
+      const dotted = dottedEnds ? [pieces[0], pieces[last]] : [];
+      panel.querySelector('.curve')!.setAttribute('d', solid.join(' '));
+      panel.querySelector('.curve-more')!.setAttribute('d', dotted.join(' '));
+      // The bar of outputs in use, kept to the plot. When the outputs run past
+      // the top, an arrowhead says they carry on.
+      const image = panel.querySelector<SVGLineElement>('.image')!;
+      const past = sy(hi) < plot.top;
+      image.setAttribute('y1', Math.min(plot.bottom, sy(lo)).toFixed(1));
+      image.setAttribute('y2', (past ? plot.top + 4 : sy(hi)).toFixed(1));
+      if (past) image.setAttribute('marker-end', image.dataset.more!);
+      else image.removeAttribute('marker-end');
+    }
+
+    function animate(k: number, id: number) {
+      if (reduceMotion) {
+        draw(k, 1);
+        return Promise.resolve();
+      }
+      return new Promise<void>((resolve) => {
+        const start = performance.now();
+        const frame = (now: number) => {
+          if (id !== run) return resolve();
+          const t = clamp((now - start) / morph);
+          draw(k, t);
+          if (t < 1) requestAnimationFrame(frame);
+          else resolve();
+        };
+        requestAnimationFrame(frame);
+      });
+    }
+
+    async function play() {
+      const id = ++run;
+      button.disabled = true;
+      panels.forEach((p, k) => {
+        draw(k, 0);
+        p.classList.remove('active');
+      });
+      status.textContent = 'The input line: every input, before f is applied';
+      if (!reduceMotion) await sleep(900);
+      if (id !== run) return;
+
+      panels[0].classList.add('active');
+      status.textContent = 'x²: the outputs grow without limit';
+      await animate(0, id);
+      if (id !== run) return;
+      if (!reduceMotion) await sleep(600);
+
+      panels[1].classList.add('active');
+      status.textContent = `x mod ${m}: every output falls between 0 and ${m}`;
+      await animate(1, id);
+      if (id !== run) return;
+
+      status.textContent = `x² can output any size of number; x mod ${m} only outputs between 0 and ${m}`;
+      button.disabled = false;
+    }
+
+    panels.forEach((_, k) => draw(k, 0));
+    button.addEventListener('click', play);
+
+    new IntersectionObserver((entries, observer) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        observer.disconnect();
+        play();
+      }
+    }, { threshold: 0.5 }).observe(figure);
+  }
+
+  document.querySelectorAll<HTMLElement>('.inf-fin').forEach(setup);
+</script>
+
+<style>
+  .inf-fin {
+    margin: 2rem 0;
+  }
+  .frame {
+    padding: 1rem 1rem 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    max-width: 34rem;
+    height: auto;
+    margin: 0 auto;
+    font-family: inherit;
+  }
+  .fn {
+    fill: var(--text);
+    font-size: 19px;
+    font-style: italic;
+  }
+  .verdict {
+    fill: var(--muted);
+    font-size: 16px;
+  }
+  .panel.active .verdict {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+  .axis {
+    stroke: var(--muted);
+    stroke-width: 1.2;
+  }
+  .arrowhead {
+    fill: var(--muted);
+  }
+  .axis-label {
+    fill: var(--muted);
+    font-size: 14px;
+  }
+  .curve {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .curve-more {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-dasharray: 0 8;
+  }
+  .image {
+    stroke: var(--accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+    opacity: 0.6;
+  }
+  .more {
+    fill: var(--accent);
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  figcaption strong {
+    color: var(--text);
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  button {
+    font: inherit;
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) {
+    border-color: var(--text);
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+</style>
