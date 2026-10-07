@@ -7,11 +7,11 @@ draft: true
 import FiniteOutput from '../../components/FiniteOutput.astro';
 import HashMapping from '../../components/HashMapping.astro';
 
-**Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables (aka dictionaries) and bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions **that map an arbitrarily large input space to a fixed size output space**. That's it.
+**Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables (aka dictionaries) and bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions that map an arbitrarily large input space to a **fixed size output space**. That's it.
 
 <FiniteOutput label="Fig 1." caption="A function maps an unbounded input space onto an output space of fixed size." />
 
-In computer science, the finite output space that gets mapped to often indexes an array in memory, so it being finite is crucial. To be more explicit, hashing relies on two core properties:
+Often the finite output space that gets mapped to indexes an array in memory. To be more explicit, hashing relies on two core properties:
 
 1. **Deterministic** - a given input must map to the same output, every time.
 2. **Output space must have fixed size** - as mentioned above, this is the key property.
@@ -21,6 +21,10 @@ with an optional third property in the case of cryptographic hash functions:
 3. **Irreversibility** - Unable to go backwards from output to input (easily).
 
 We won't worry about irreversibility in this post.
+
+### Hash Collisions
+
+Since hash functions map a large space down to a smaller space, you'd be correct in thinking that some input values get mapped to the *same* output value, when this happens it's called a **collision** - and it's unideal. Let's explore why in the case of hash tables.
 
 <HashMapping label="Fig 2." caption={"Keys mapped to indexes of an array by h(x)\u00a0=\u00a0x\u00a0mod\u00a08."} />
 
