@@ -24,13 +24,15 @@ We won't worry about irreversibility in this post.
 
 ### Hash Collisions
 
-Since hash functions map a large space down to a smaller space, you'd be correct in thinking that some input values get mapped to the *same* output value, when this happens it's called a **collision** - and it's unideal. Let's explore why in the case of hash tables.
+Since hash functions map a large space down to a smaller space, you'd be correct in thinking that some input values get mapped to the *same* output value. When this happens it's called a **collision** - and it's unideal. Let's explore why.
 
 <HashMapping label="Fig 2." caption={"Keys mapped to indexes of an array by h(x)\u00a0=\u00a0x\u00a0mod\u00a08."} />
 
+In a set (or hash table, or bloom filter etc) values are stored in memory at an address given by the hash function, if two values map to the same address then the multiple values are stored in the same bucket as a linked list. This slows down lookups for values that collide since traversing a linked list is $O(n)$, e.g. looking up $41$ in the hash table in Fig 2 involves one more step than looking up $18$.
+
 #### Collisions slow lookups down
 
-Looking up data for a key in a set means computing $h$ for that key. The hash function used in Fig 2 above, $h(x) = x \bmod 8$, happens to map the keys 25 and 41 to the same bucket (bucket 1) - we call this double mapping a **collision**. And it's a bad thing. Why? Looking up data for a key in a hash table means computing $h(key)$, if there are no collisions then the answer you're looking for is in the only thing present in the bucket, simples. But if the bucket houses many keys (i.e. lots of collisions occurred), then you have to sift through each element in the bucket to check for your key, this takes linear time.
+Looking up data for a key in a set means computing $h$ for that key. The hash function used in Fig 2 above, $h(x) = x \bmod 8$, happens to map the keys 25 and 41 to the same bucket (bucket 1) - a collision. And it's a bad thing. Why? Looking up data for a key in a hash table means computing $h(key)$, if there are no collisions then the answer you're looking for is in the only thing present in the bucket, simples. But if the bucket houses many keys (i.e. lots of collisions occurred), then you have to sift through each element in the bucket to check for your key, this takes linear time.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
