@@ -5,6 +5,8 @@
 // through h, shrinking and reshaping into the range, while the domain's
 // elements stream through h and pile onto the range's few points.
 // Built like HashMapping: static parts in the markup, moving parts by script.
+import ReplayButton from './ReplayButton.astro';
+
 interface Props {
   /** Number of points in the output space. */
   outputs?: number;
@@ -114,7 +116,7 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
 
     <div class="controls">
       <span class="status" aria-live="polite">The input space: every possible input</span>
-      <button type="button" data-replay>Replay</button>
+      <ReplayButton />
     </div>
   </div>
   {
@@ -357,21 +359,5 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
     margin-top: 0.5rem;
     font-size: 0.85rem;
     color: var(--muted);
-  }
-  button {
-    font: inherit;
-    color: var(--text);
-    background: none;
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    padding: 0.35rem 0.9rem;
-    cursor: pointer;
-  }
-  button:hover:not(:disabled) {
-    border-color: var(--text);
-  }
-  button:disabled {
-    opacity: 0.4;
-    cursor: default;
   }
 </style>

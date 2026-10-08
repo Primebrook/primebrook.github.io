@@ -4,6 +4,8 @@
 // index h gave them; a key that collides chains off to the right of its slot.
 // The default keys give exactly one collision (41 joins 25 in slot 1). Built like
 // HashingAnimation: static parts in the markup, moving keys made by the script.
+import ReplayButton from './ReplayButton.astro';
+
 interface Props {
   keys?: number[];
   slots?: number;
@@ -87,7 +89,7 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
 
     <div class="controls">
       <span class="status" aria-live="polite">Ready to hash {keys.length} keys into {slots} slots</span>
-      <button type="button" data-replay>Replay</button>
+      <ReplayButton />
     </div>
   </div>
   {
@@ -346,21 +348,5 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
     margin-top: 0.5rem;
     font-size: 0.85rem;
     color: var(--muted);
-  }
-  button {
-    font: inherit;
-    color: var(--text);
-    background: none;
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    padding: 0.35rem 0.9rem;
-    cursor: pointer;
-  }
-  button:hover:not(:disabled) {
-    border-color: var(--text);
-  }
-  button:disabled {
-    opacity: 0.4;
-    cursor: default;
   }
 </style>

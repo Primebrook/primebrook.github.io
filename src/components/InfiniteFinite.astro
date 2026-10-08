@@ -4,6 +4,8 @@
 // have no limit (infinite to infinite). Bottom: y = x mod m breaks into teeth
 // that all stay between 0 and m (infinite to finite). A bar on each output
 // axis shows the outputs in use as the line changes.
+import ReplayButton from './ReplayButton.astro';
+
 interface Props {
   /** Modulus for the bottom panel. */
   m?: number;
@@ -75,7 +77,7 @@ const id = `inf-${Math.random().toString(36).slice(2, 8)}`;
 
     <div class="controls">
       <span class="status" aria-live="polite">Ready</span>
-      <button type="button" data-replay>Replay</button>
+      <ReplayButton />
     </div>
   </div>
   {
@@ -295,21 +297,5 @@ const id = `inf-${Math.random().toString(36).slice(2, 8)}`;
     margin-top: 0.5rem;
     font-size: 0.85rem;
     color: var(--muted);
-  }
-  button {
-    font: inherit;
-    color: var(--text);
-    background: none;
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    padding: 0.35rem 0.9rem;
-    cursor: pointer;
-  }
-  button:hover:not(:disabled) {
-    border-color: var(--text);
-  }
-  button:disabled {
-    opacity: 0.4;
-    cursor: default;
   }
 </style>

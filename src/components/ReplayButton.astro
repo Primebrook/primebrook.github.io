@@ -1,0 +1,48 @@
+---
+// The replay control for animated figures: a round icon button with a
+// circular arrow, "Replay" as its tooltip and accessible name. The figure's
+// script finds it by [data-replay] and disables it while the animation runs.
+---
+
+<button type="button" class="replay" data-replay aria-label="Replay" title="Replay">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+    <path d="M20 4v5h-5" />
+  </svg>
+</button>
+
+<style>
+  .replay {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 150ms, border-color 150ms;
+  }
+  .replay:hover:not(:disabled),
+  .replay:focus-visible {
+    color: var(--text);
+    border-color: var(--text);
+  }
+  .replay:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
