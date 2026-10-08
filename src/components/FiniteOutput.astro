@@ -15,7 +15,7 @@ interface Props {
   caption?: string;
 }
 
-const { outputs = 8, fn = 'f', label, caption } = Astro.props;
+const { outputs = 8, fn = 'h', label, caption } = Astro.props;
 
 const width = 480;
 const height = 330;
@@ -178,7 +178,7 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
       domainEl.classList.add('done');
       rangeEl.classList.add('filled');
       points.forEach((p) => p.classList.add('hit'));
-      status.textContent = `An unbounded input space, mapped onto an output space of ${points.length} values`;
+      status.textContent = `${fn} maps an unbounded input space onto an output space of ${points.length} values`;
       button.disabled = false;
     }
 
