@@ -45,4 +45,15 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 One way of getting good hashing is by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution, then we won't get many collisions. BUT in the real world, data is clumpy, full of patterns (even adversarial) - so if we want our implementation to be useful, we cannot make any assumptions about our inputs.
 
-Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it's to relocate the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function). Universal hashing says that if we pick an appropriate **family of hash functions** then we can pick $h$ randomly from this family and have solid guarantees about the collision rate, regardless of the input distribution. This means we never have to fix our hash function, every time our program starts we can pick a new $h$ from this **universal family**. This protects us against potential adversaries who might otherwise deliberately pass in colliding keys to massively slow down our look ups.
+Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function). Universal hashing says that if we pick an appropriate **family of hash functions** then we can pick $h$ (randomly) from this family and have mathematical guarantees about the collision rate, regardless of the input distribution. This means we never have to fix our hash function, every time our program starts we can pick a new $h$ from this **universal family**. This protects us against potential adversaries who might otherwise deliberately pass in colliding keys to massively slow down our look ups.
+
+### Universal Hashing
+
+Let $U$ be a set of keys that we want to hash. We can suppose $U \subset \mathbb{N}$, since we can represent finite strings as unique positive integers (e.g. via ASCII, UTF-8 encodings).
+
+A set of hash functions **$\mathcal{H} = \{h : U \rightarrow \mathbb{Z}_m \}$** is called a **universal family** if, $\forall x, y \in U, \space x \neq y$
+
+$$ \left\vert \{h \in \mathcal{H} : h(x) = h(y)\} \right\vert \leq \frac{\vert\mathcal{H}\vert}{m}$$
+in other words if you draw a function at random from this set, the probability that any two separate keys in $U$ get mapped to the same value in $\mathbb{Z}_m$ is at most $1/m$. This is the probability of collision. This definition can be alternatively phrased as $\forall x, y \in U, \space x \neq y$
+
+$$\underset{h \sim \mathcal{H}}{\text{Pr}} \left[h(x) = h(y)\right] \leq \frac{1}{m}$$
