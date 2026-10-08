@@ -2,6 +2,8 @@
 // Keys hashed into a table of m buckets with h(k) = k mod m; collisions chain
 // upwards. Hand-written SVG stepped by a small script, the same technique as
 // the diagrams on kingori.co. Plays once when scrolled into view, then on Replay.
+import ReplayButton from './ReplayButton.astro';
+
 interface Props {
   keys?: number[];
   buckets?: number;
@@ -40,7 +42,7 @@ const floor = 262;
 
   <div class="controls">
     <span class="status" aria-live="polite">Ready to insert {keys.length} keys</span>
-    <button type="button" data-replay>Replay</button>
+    <ReplayButton />
   </div>
 </figure>
 
@@ -206,21 +208,5 @@ const floor = 262;
     margin-top: 0.5rem;
     font-size: 0.85rem;
     color: var(--muted);
-  }
-  button {
-    font: inherit;
-    color: var(--text);
-    background: none;
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    padding: 0.35rem 0.9rem;
-    cursor: pointer;
-  }
-  button:hover:not(:disabled) {
-    border-color: var(--text);
-  }
-  button:disabled {
-    opacity: 0.4;
-    cursor: default;
   }
 </style>
