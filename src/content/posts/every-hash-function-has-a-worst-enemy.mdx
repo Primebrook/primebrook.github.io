@@ -11,7 +11,7 @@ import HashMapping from '../../components/HashMapping.astro';
 
 <FiniteOutput label="Fig 1." caption="A function maps an unbounded input space onto an output space of fixed size." />
 
-Typically, the finite output space indexes an array in memory, e.g. if the output space of a hash function are the integers between $0$ and $8$, then we're dealing with an array of size $8$. To be more explicit, hashing relies on two core properties:
+Typically, the finite output space indexes an array in memory, e.g. if the output space of a hash function are the integers between $0$ and $7$, then we're dealing with an array of size $8$. To be more explicit, hashing relies on two core properties:
 
 1. **Determinism** - a given input must map to the same output, every time.
 2. **Output space must have fixed size** - as mentioned above, this is the key property.
@@ -24,18 +24,18 @@ We won't worry about irreversibility in this post.
 
 ### Hash collisions
 
-Since hash functions map a large space to a smaller space, you'd be correct in thinking that there might exist different input values that get mapped to the *same* output value. When this happens in a data structure like a set or hash table, it's called a **collision**, and it's unideal because values that *collide* are stored in the same bucket as a linked list. Accessing values in a linked list takes linear time.
+Since hash functions map a large space to a smaller space, you'd be correct in thinking that there might exist *different inputs* that get mapped to the *same output* value. When this happens in a (hash based) data structure, it's called a **collision**, and it's unideal because values that *collide* are stored in the same bucket as a linked list. Accessing values in a linked list takes linear time.
 
 <HashMapping label="Fig 2." caption={"Keys mapped to indexes of an array by h(x)\u00a0=\u00a0x\u00a0mod\u00a08."} />
 
-For example, looking up $41$ in the hash table in Fig 2 involves one more step than does looking up $18$, hence **collisions slow look ups down**. However, unless you pick a terribly designed hash function (e.g. $h(x) = x \bmod 2$ collides for every other integer) then collisions are still rare and hence hash table look ups are still fast on *average*.
+For example, looking up $41$ in the hash table in Fig 2 involves one more step than does looking up $18$, hence **collisions slow look ups down**. However, unless you happen to pick a terribly designed hash function (e.g. $h(x) = x \bmod 2$ collides for every other integer), then collisions are still rare and hash table look ups are still fast on *average*.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
 
 At the 28th Chaos Communication Congress (28C3) in December 2011, Alexander Klink and Julian Wälde showed that the web platforms most of the internet ran on could be tied up by a single HTTP request. The talk is [Effective Denial of Service attacks against web application platforms](https://youtu.be/R2Cq3CLI6H8).
 
-The attack is the slow lookup above, made deliberate. Web frameworks load a request's parameters into a hash table before your code ever runs. Their hash functions were fixed and public, so an attacker could work out offline thousands of parameter names that all land in the same bucket, and send them in one POST request. Each insert then scans the whole chain built so far: $n$ keys cost about $n^2/2$ comparisons instead of about $n$. One request could keep a server's CPU busy for minutes, and a handful of them could take it down.
+The attack is the slow lookup above, made deliberate. Web frameworks load a request's parameters into a hash table before the code ever runs. Their hash functions were fixed and public, so an attacker could work out offline thousands of parameter names that all land in the same bucket, and send them in one POST request. Each insert then scans the whole chain built so far: $n$ keys cost about $n^2/2$ comparisons instead of about $n$. One request could keep a server's CPU busy for minutes, and a handful of them could take it down.
 
 PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been described in 2003 by Crosby and Wallach, and Perl fixed it then; most other languages hadn't. The fix that stuck was to stop using a fixed hash function: Python, for example, has picked a random hash seed for strings every time it starts since version 3.3.
 
@@ -43,6 +43,6 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 ### Random inputs or random functions?
 
-One way of getting good hashing is by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution. BUT in the real world, data is clumpy, full of patterns (even adversarial) - so if we want our implementation to be useful in the real world we cannot make any assumptions on our inputs.
+One way of getting good hashing is by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution, then we won't get many collisions. BUT in the real world, data is clumpy, full of patterns (even adversarial) - so if we want our implementation to be useful, we cannot make any assumptions about our inputs.
 
-Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it's to relocate the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function).
+Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it's to relocate the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function). Universal hashing says that if we pick an appropriate **family of hash functions** then we can pick $h$ randomly from this family and have solid guarantees about the collision rate, regardless of the input distribution. This means we never have to fix our hash function, every time our program starts we can pick a new $h$ from this **universal family**. This protects us against potential adversaries who might otherwise deliberately pass in colliding keys to massively slow down our look ups.
