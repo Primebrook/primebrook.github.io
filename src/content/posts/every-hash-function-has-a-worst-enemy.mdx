@@ -11,7 +11,7 @@ import HashMapping from '../../components/HashMapping.astro';
 
 <FiniteOutput label="Fig 1." caption="A function maps an unbounded input space onto an output space of fixed size." />
 
-Typically, the finite output space indexes an array in memory, e.g. if the output space of a hash function are the integers between $0$ and $7$, then we're dealing with an array of size $8$. To be more explicit, hashing relies on two core properties:
+Typically, the finite output space indexes an array in memory, e.g. if the output space of a hash function is the integers between $0$ and $7$, then we're dealing with an array of size $8$. To be more explicit, hashing relies on two core properties:
 
 1. **Determinism** - a given input must map to the same output, every time.
 2. **Output space must have fixed size** - as mentioned above, this is the key property.
@@ -28,7 +28,7 @@ Since hash functions map a large space to a smaller space, you'd be correct in t
 
 <HashMapping label="Fig 2." caption={"Keys mapped to indexes of an array by h(x)\u00a0=\u00a0x\u00a0mod\u00a08."} />
 
-For example, looking up $41$ in the hash table in Fig 2 involves one more step than does looking up $18$, hence **collisions slow look ups down**. However, unless you happen to pick a terribly designed hash function (e.g. $h(x) = x \bmod 2$ collides for every other integer), then collisions are still rare and hash table look ups are still fast on *average*.
+For example, looking up $41$ in the hash table in Fig 2 involves one more step than does looking up $18$, hence **collisions slow look ups down**. However, unless you happen to pick a terribly designed hash function (e.g. $h(x) = x \bmod 2$ collides for every other integer), then the keys spread out across the buckets, each bucket stays short, and hash table look ups are still fast on *average*.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
