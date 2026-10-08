@@ -11,9 +11,9 @@ import HashMapping from '../../components/HashMapping.astro';
 
 <FiniteOutput label="Fig 1." caption="A function maps an unbounded input space onto an output space of fixed size." />
 
-Often the finite output space that gets mapped to indexes an array in memory. To be more explicit, hashing relies on two core properties:
+Typically, the finite output space indexes an array in memory, e.g. if the output space of a hash function are the integers between $0$ and $8$, then we're dealing with an array of size $8$. To be more explicit, hashing relies on two core properties:
 
-1. **Deterministic** - a given input must map to the same output, every time.
+1. **Determinism** - a given input must map to the same output, every time.
 2. **Output space must have fixed size** - as mentioned above, this is the key property.
 
 with an optional third property in the case of cryptographic hash functions:
@@ -22,13 +22,13 @@ with an optional third property in the case of cryptographic hash functions:
 
 We won't worry about irreversibility in this post.
 
-### Hash Collisions
+### Hash collisions
 
-Since hash functions map a large space down to a smaller space, you'd be correct in thinking that some input values get mapped to the *same* output value. When this happens in a data structure like a set or hash table, it's called a **collision** - and it's unideal because values that *collide* are stored in the same bucket as a linked list. Accessing a value in the linked list takes linear time.
+Since hash functions map a large space to a smaller space, you'd be correct in thinking that there might exist different input values that get mapped to the *same* output value. When this happens in a data structure like a set or hash table, it's called a **collision**, and it's unideal because values that *collide* are stored in the same bucket as a linked list. Accessing values in a linked list takes linear time.
 
 <HashMapping label="Fig 2." caption={"Keys mapped to indexes of an array by h(x)\u00a0=\u00a0x\u00a0mod\u00a08."} />
 
-For example, looking up $41$ in the hash table in Fig 2 involves one more step than does looking up $18$ - so **collisions slow look ups down**. But unless you pick a terribly designed hash function (e.g. $h(x) = x \bmod 2$ collides for every other integer) then collisions are still rare and hence hash table look ups are still fast on an average input.
+For example, looking up $41$ in the hash table in Fig 2 involves one more step than does looking up $18$, hence **collisions slow look ups down**. However, unless you pick a terribly designed hash function (e.g. $h(x) = x \bmod 2$ collides for every other integer) then collisions are still rare and hence hash table look ups are still fast on *average*.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
@@ -43,6 +43,6 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 ### Random inputs or random functions?
 
-We could cheat and get good hashing by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution. But in the real world, data is clumpy, full of patterns (even adversarial) - we cannot make any assumptions on our inputs, ideally we'd design around the worst inputs.
+One way of getting good hashing is by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution. BUT in the real world, data is clumpy, full of patterns (even adversarial) - so if we want our implementation to be useful in the real world we cannot make any assumptions on our inputs.
 
-Instead of assuming *random inputs*, we can make our choice of $h$ random. This is the idea behind **Universal Hashing**, it's to relocate the randomness from an area we don't control (inputs) to an area we do (choice of hash function).
+Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it's to relocate the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function).
