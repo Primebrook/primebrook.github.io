@@ -32,7 +32,7 @@ Since hash functions map a large space to a smaller space, you'd be correct in t
   <HashMapping slots={2} chainRoom={4} />
 </FigureRow>
 
-For example, in the first image of Fig 2, looking up $25$ is an $O(1)$ operation, whereas looking up $41$ involves traversing the linked list making it an $O(n)$ operation, hence **collisions slow look ups down**. However, unless you happen to pick a terribly designed hash function (e.g. the second image in Fig 2 shows $h(x) = x \bmod 2$, which collides every second integer), then the keys spread out across the buckets, each bucket stays short, and hash table look ups are still fast on *average*.
+For example, in the first image of Fig 2, looking up $25$ is an $O(1)$ operation, whereas looking up $41$ involves traversing the linked list making it an $O(n)$ operation, hence **collisions slow look ups down**. However, unless you happen to pick a terribly designed hash function (e.g. the second image in Fig 2 shows $h(x) = x \bmod 2$, which collides every second integer), then the keys spread out across the buckets, each bucket stays short, and hash table look ups remain fast on *average*.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
@@ -47,9 +47,9 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 #### Random inputs or random functions?
 
-One way of getting good hashing is by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution, then we won't get many collisions. BUT in the real world, data is clumpy, full of patterns (even adversarial) - so if we want our implementation to be useful, we cannot make any assumptions about our inputs.
+One way of getting good hashing is by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution, meaning we won't get many collisions. BUT in the real world, data is clumpy, full of patterns (even adversarial) - so if we want our implementation to be useful, we cannot make any assumptions about our inputs.
 
-Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function). Universal hashing says that if we pick an appropriate **family of hash functions** then we can pick $h$ (randomly) from this family and have mathematical guarantees about the collision rate, regardless of the input distribution. This means we never have to fix our hash function, every time our program starts we can pick a new $h$ from this **universal family**. This protects us against potential adversaries who might otherwise deliberately pass in colliding keys to massively slow down our look ups.
+Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function). Universal hashing says that if we put together an appropriate **family of hash functions** then we can pick $h$ (randomly) from this family and have mathematical guarantees about the collision rate, regardless of the input distribution. This means we never have to fix our hash function; every time our program starts we can pick a new $h$ from this "**universal family**". The element of randomness in selecting $h$ protects us against potential adversaries who might otherwise deliberately pass in colliding keys to slow down look ups.
 
 ## Universal Hashing
 
