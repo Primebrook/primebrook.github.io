@@ -23,7 +23,7 @@ with an optional third property in the case of cryptographic hash functions:
 
 We won't worry about irreversibility in this post.
 
-### Hash collisions
+## Hash collisions
 
 Since hash functions map a large space to a smaller space, you'd be correct in thinking that there might exist *different inputs* that get mapped to the *same output* value. When this happens in a (hash based) data structure, it's called a **collision**, and it's unideal because values that *collide* are stored in the same bucket as a linked list. Accessing values in a linked list takes linear time.
 
@@ -45,13 +45,13 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 </details>
 
-### Random inputs or random functions?
+##### Random inputs or random functions?
 
 One way of getting good hashing is by assuming the inputs are random. That is, we can assume the keys are nicely spread out, drawn from some uniform distribution, then we won't get many collisions. BUT in the real world, data is clumpy, full of patterns (even adversarial) - so if we want our implementation to be useful, we cannot make any assumptions about our inputs.
 
 Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of hash function). Universal hashing says that if we pick an appropriate **family of hash functions** then we can pick $h$ (randomly) from this family and have mathematical guarantees about the collision rate, regardless of the input distribution. This means we never have to fix our hash function, every time our program starts we can pick a new $h$ from this **universal family**. This protects us against potential adversaries who might otherwise deliberately pass in colliding keys to massively slow down our look ups.
 
-### Universal Hashing
+## Universal Hashing
 
 Let $U$ be a set of keys that we want to hash. We can suppose $U \subset \mathbb{N}$, since we can represent finite strings as unique positive integers (e.g. via ASCII, UTF-8 encodings).
 
