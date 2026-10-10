@@ -115,7 +115,7 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
     </svg>
 
     <div class="controls">
-      <span class="status" aria-live="polite">The input space: every possible input</span>
+      <span class="status">{fn} maps an unbounded input space onto an output space of {outputs} values</span>
       <ReplayButton />
     </div>
   </div>
@@ -144,7 +144,6 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
     const rangeEl = figure.querySelector<SVGGElement>('.range')!;
     const domainEl = figure.querySelector<SVGGElement>('.domain')!;
     const points = [...figure.querySelectorAll<SVGCircleElement>('.point')];
-    const status = figure.querySelector<HTMLElement>('.status')!;
     const button = figure.querySelector<HTMLButtonElement>('[data-replay]')!;
 
     // Elements nearest h set off first, so the domain drains towards it.
@@ -180,7 +179,6 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
       domainEl.classList.add('done');
       rangeEl.classList.add('filled');
       points.forEach((p) => p.classList.add('hit'));
-      status.textContent = `${fn} maps an unbounded input space onto an output space of ${points.length} values`;
       button.disabled = false;
     }
 
@@ -205,7 +203,6 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
         return c;
       });
 
-      status.textContent = `${fn} maps every input to one of the output space's values`;
       const start = performance.now();
       const frame = (now: number) => {
         if (id !== run) return;
