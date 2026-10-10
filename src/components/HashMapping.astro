@@ -195,11 +195,10 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
           place(tokens[i], target);
         } else {
           tokens[i].classList.add('active');
-          status.textContent = `h(${key}) = ?`;
+          status.textContent = `h(${key}) = ${s}`;
           await tween(tokens[i], [g.keyX, keyY(i)], [g.hashX, g.midY], 420);
           if (id !== run) return;
           hash.classList.add('busy');
-          status.textContent = `h(${key}) = ${s}`;
           slots[s].classList.add('hit');
           await sleep(220);
           hash.classList.remove('busy');
