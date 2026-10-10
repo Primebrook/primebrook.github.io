@@ -19,10 +19,10 @@ const floor = 262;
 
 <figure class="hash-anim" data-keys={JSON.stringify(keys)} data-buckets={buckets}>
   <svg viewBox={`0 0 ${width} 320`} role="img" aria-labelledby="hash-anim-title">
-    <title id="hash-anim-title">
+    <desc id="hash-anim-title">
       Keys {keys.join(', ')} inserted into a hash table of {buckets} buckets using h(k) = k mod {buckets},
       with colliding keys chained in the same bucket.
-    </title>
+    </desc>
 
     <text class="formula" x={width / 2} y="30" text-anchor="middle">h(k) = k mod {buckets}</text>
 

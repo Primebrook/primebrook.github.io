@@ -162,7 +162,9 @@ structure:
   `--bg`) so dark mode works. Never hard-code a colour in a component.
 - **Start on scroll** with an `IntersectionObserver`, and offer **Replay**.
 - **`prefers-reduced-motion`**: jump to the end state instead of animating.
-- **A `<title>` in the SVG** describing what it shows, and an `aria-live`
+- **A `<desc>` in the SVG** describing what it shows, referenced by the
+  `<svg>`'s `aria-labelledby`. Not `<title>`: browsers show that as a hover
+  tooltip, line breaks and all. Then an `aria-live`
   status line narrating the steps. `npm run inspect` prints that status line,
   which is how to check an animation ran to the end without watching it.
 - `viewBox` plus `width: 100%` so it scales down on phones. Check at 375px.

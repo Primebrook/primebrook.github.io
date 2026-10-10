@@ -69,11 +69,11 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
 >
   <div class="frame">
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-title`}>
-      <title id={`${id}-title`}>
+      <desc id={`${id}-title`}>
         A function {fn} drawn as sets. Its input space is a shape larger than the picture, fading out to the left to
         show it has no bound. {fn} transforms it into its output space, a small shape holding just {outputs} values,
         so every input lands on one of those {outputs} values.
-      </title>
+      </desc>
       <defs>
         <linearGradient id={`${id}-fade-x`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="80" y2="0">
           <stop offset="0" stop-color="black" />
