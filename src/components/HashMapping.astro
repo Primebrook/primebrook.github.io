@@ -1,6 +1,6 @@
 ---
 // What hashing is: keys flowing left to right through h(x) = x mod m into an
-// array. The keys wait in a column, pass through h, and land in the slot whose
+// array of `slots` slots (m defaults to `slots`; a smaller m leaves slots unused). The keys wait in a column, pass through h, and land in the slot whose
 // index h gave them; a key that collides chains off to the right of its slot.
 // The default keys give exactly one collision (41 joins 25 in slot 1). Built like
 // HashingAnimation: static parts in the markup, moving keys made by the script.
@@ -9,12 +9,16 @@ import ReplayButton from './ReplayButton.astro';
 interface Props {
   keys?: number[];
   slots?: number;
+  /** The m in h(x) = x mod m. Defaults to `slots`. */
+  modulus?: number;
+  /** Reserve room for chains this long, so figures shown together share a scale. */
+  chainRoom?: number;
   /** Shown in bold before the caption, e.g. "Fig 1." */
   label?: string;
   caption?: string;
 }
 
-const { keys = [12, 7, 25, 30, 41, 18, 3], slots = 8, label, caption } = Astro.props;
+const { keys = [12, 7, 25, 30, 41, 18, 3], slots = 8, modulus = slots, chainRoom = 1, label, caption } = Astro.props;
 
 const row = 40;
 const top = 66;
@@ -29,8 +33,8 @@ const token = { w: 34, h: row - 12 };
 // Wide enough for the longest chain these keys make, and no wider, so the
 // figure scales down as little as possible on a phone.
 const counts = new Array(slots).fill(0);
-keys.forEach((k) => counts[k % slots]++);
-const width = cellX + (Math.max(...counts) - 1) * (token.w + 10) + token.w / 2 + 24;
+keys.forEach((k) => counts[k % modulus]++);
+const width = cellX + (Math.max(chainRoom, ...counts) - 1) * (token.w + 10) + token.w / 2 + 24;
 const slotY = (i: number) => top + (rows - slots) * (row / 2) + i * row + row / 2;
 const keyY = (i: number) => top + (rows - keys.length) * (row / 2) + i * row + row / 2;
 const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
@@ -40,12 +44,13 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
   class="hash-map"
   data-keys={JSON.stringify(keys)}
   data-slots={slots}
+  data-modulus={modulus}
   data-geometry={JSON.stringify({ width, row, top, rows, keyX, hashX, cellX, cell, token, midY })}
 >
   <div class="frame">
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId}>
       <title id={titleId}>
-        Keys {keys.join(', ')} pass one at a time through the hash function h(x) = x mod {slots}, which gives
+        Keys {keys.join(', ')} pass one at a time through the hash function h(x) = x mod {modulus}, which gives
         each an index into an array of {slots} slots. Keys that get the same index collide and are chained in
         the same slot.
       </title>
@@ -55,7 +60,7 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
         </marker>
       </defs>
 
-      <text class="formula" x={width / 2} y="22" text-anchor="middle">h(x) = x mod {slots}</text>
+      <text class="formula" x={width / 2} y="22" text-anchor="middle">h(x) = x mod {modulus}</text>
 
       <text class="caption" x={keyX} y={top - 14} text-anchor="middle">keys</text>
       <text class="caption" x={cellX} y={top - 14} text-anchor="middle">array</text>
@@ -128,6 +133,7 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
   function setup(figure: HTMLElement) {
     const keys: number[] = JSON.parse(figure.dataset.keys!);
     const m = Number(figure.dataset.slots);
+    const modulus = Number(figure.dataset.modulus);
     const g = JSON.parse(figure.dataset.geometry!);
     const layer = figure.querySelector<SVGGElement>('.keys')!;
     const hash = figure.querySelector<SVGGElement>('.hash')!;
@@ -155,7 +161,7 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
       return el;
     }
 
-    const h = (x: number) => x % m;
+    const h = (x: number) => x % modulus;
 
     async function play() {
       const id = ++run;
@@ -233,9 +239,17 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
 
 <style>
   .hash-map {
+    display: flex;
+    flex-direction: column;
     margin: 2rem 0;
   }
+  /* Fills the figure's height, so panels side by side in a FigureRow match and
+     their controls line up along the bottom. */
   .frame {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     padding: 1rem 1rem 0.75rem;
     border: 1px solid var(--rule);
     border-radius: 10px;

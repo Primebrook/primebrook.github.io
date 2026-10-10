@@ -5,6 +5,7 @@ draft: true
 ---
 
 import FiniteOutput from '../../components/FiniteOutput.astro';
+import FigureRow from '../../components/FigureRow.astro';
 import HashMapping from '../../components/HashMapping.astro';
 
 **Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables (aka dictionaries) and bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions that map an arbitrarily large input space to a **fixed size output space**. That's it.
@@ -26,9 +27,12 @@ We won't worry about irreversibility in this post.
 
 Since hash functions map a large space to a smaller space, you'd be correct in thinking that there might exist *different inputs* that get mapped to the *same output* value. When this happens in a (hash based) data structure, it's called a **collision**, and it's unideal because values that *collide* are stored in the same bucket as a linked list. Accessing values in a linked list takes linear time.
 
-<HashMapping label="Fig 2." caption={"Keys mapped to indexes of an array by h(x)\u00a0=\u00a0x\u00a0mod\u00a08."} />
+<FigureRow label="Fig 2." caption={"The same keys hashed by h(x)\u00a0=\u00a0x\u00a0mod\u00a08 into eight slots, then by h(x)\u00a0=\u00a0x\u00a0mod\u00a02 into two."}>
+  <HashMapping chainRoom={4} />
+  <HashMapping slots={2} chainRoom={4} />
+</FigureRow>
 
-For example, looking up $41$ in the hash table in Fig 2 involves one more step than does looking up $18$, hence **collisions slow look ups down**. However, unless you happen to pick a terribly designed hash function (e.g. $h(x) = x \bmod 2$ collides for every other integer), then the keys spread out across the buckets, each bucket stays short, and hash table look ups are still fast on *average*.
+For example, in the first image of Fig 2, looking up $25$ is an $O(1)$ operation, whereas looking up $41$ involves traversing the linked list making it an $O(n)$ operation, hence **collisions slow look ups down**. However, unless you happen to pick a terribly designed hash function (e.g. the second image in Fig 2 shows $h(x) = x \bmod 2$, which collides every second integer), then the keys spread out across the buckets, each bucket stays short, and hash table look ups are still fast on *average*.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>

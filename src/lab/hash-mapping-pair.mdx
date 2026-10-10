@@ -1,0 +1,18 @@
+---
+title: A good hash function and a bad one
+description: For Hashing Series Post 1, Fig 2. The same keys go through x mod 8 into 8 slots (spread out, one collision) and through x mod 2 into 2 slots (five collisions).
+---
+
+import FigureRow from '../components/FigureRow.astro';
+import HashMapping from '../components/HashMapping.astro';
+
+Placeholder prose, so the figure sits in a column of text the way it will in a post.
+The same seven keys go through $h(x) = x \bmod 8$ into eight slots, then through
+$h(x) = x \bmod 2$ into two.
+
+<FigureRow label="Fig 2." caption={"The same keys hashed by h(x)\u00a0=\u00a0x\u00a0mod\u00a08 into eight slots, then by h(x)\u00a0=\u00a0x\u00a0mod\u00a02 into two."}>
+  <HashMapping chainRoom={4} />
+  <HashMapping slots={2} chainRoom={4} />
+</FigureRow>
+
+Text after the figure, to check the spacing below it.
