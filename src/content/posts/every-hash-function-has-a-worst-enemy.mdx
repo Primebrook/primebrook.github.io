@@ -51,13 +51,18 @@ One way of getting good hashing is by assuming the inputs are random. That is, w
 
 Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of $h$). Universal hashing says that if we put together an appropriate **family of hash functions** then we can pick $h$ at random from this family and have mathematical guarantees about the collision rate, regardless of the input distribution. This element of randomness when selecting $h$ protects us against potential adversaries who might otherwise deliberately pass in colliding keys to slow down look ups. Let's define what it means to be a universal family of hash functions below.
 
-## Universal Hashing
+## Universal Family, **$\mathcal{H}$**
 
-Let $U$ be a set of keys that we want to hash. We can suppose $U \subset \mathbb{N}$, since we can represent finite strings as unique positive integers (e.g. via ASCII, UTF-8 encodings).
+Let $U$ be a set of keys that we want to hash into an array of $m$ buckets. Let **$\mathcal{H}$** be a _family of hash functions_. **$\mathcal{H}$** is called a **universal family** if for every pair of different keys $x$ and $y$, the probability that they collide when $h$ is selected at random from **$\mathcal{H}$** is at most $1/m$.
 
-A set of hash functions **$\mathcal{H} = \{h : U \rightarrow \mathbb{Z}_m \}$** is called a **universal family** if, $\forall x, y \in U, \space x \neq y$
+That's a bit wordy, let's take a moment to understand what's being said and why it's a strong claim.
 
-$$ \left\vert \{h \in \mathcal{H} : h(x) = h(y)\} \right\vert \leq \frac{\vert\mathcal{H}\vert}{m}$$
-in other words if you draw a function at random from this set, the probability that any two separate keys in $U$ get mapped to the same value in $\mathbb{Z}_m$ is at most $1/m$. This is the probability of collision. This definition can be alternatively phrased as $\forall x, y \in U, \space x \neq y$
+**We**:
 
-$$\underset{h \sim \mathcal{H}}{\text{Pr}} \left[h(x) = h(y)\right] \leq \frac{1}{m}$$
+1. Pick ANY two different keys
+2. Draw $h$ from **$\mathcal{H}$** at random
+
+**Guarantee**:
+1. Those two keys land in the same bucket with probability at most $1/m$
+
+...this is no worse than if each key's bucket were picked by rolling an $m$-sided die. We've managed to capture randomness (and the nice uniformly spreading property it gives us) in our otherwise _deterministic_ hash function; recall determinism is a crucial requirement of hash functions (we need to be able to find a key after we have hashed it 🤓).
