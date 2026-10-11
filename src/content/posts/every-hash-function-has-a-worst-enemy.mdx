@@ -12,7 +12,7 @@ import SetOperation from '../../components/SetOperation.astro';
 
 <FiniteOutput label="Fig 1." caption="h maps an unbounded input space onto an output space of 8 values." />
 
-Typically, the finite output space indexes an array in memory, e.g. if the output space of a hash function is the integers between $0$ and $7$, then we're dealing with an array of size $8$. To be more explicit, hashing relies on two core properties:
+Typically, the finite output space indexes an array in memory. For example, if the output space of a hash function is the integers between $0$ and $7$, then we're dealing with an array of size $8$. More explicitly, hashing relies on two core properties:
 
 1. **Output space must have fixed size** - as mentioned above, this is the key property.
 2. **Determinism** - a given input must map to the same output, every time.
@@ -25,7 +25,7 @@ We won't worry about irreversibility in this post.
 
 ## Sets: How do they work?
 
-The simplest hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The most common operations to perform on a set are _inserts_ and _look ups_ ("is $y$ a member of my set?").
+The simplest hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The most common operations to perform on a set are INSERTs and LOOKUPs ("is $y$ a member of my set?").
 
 The process of inserting a key into a set is:
 
@@ -50,7 +50,7 @@ These two operations are the core of all hash based data structures. For instanc
 
 Since hash functions map a large space to a smaller space, you'd be correct in thinking that there often exist multiple inputs that get mapped to the same output value. When this happens in a set it's called a **collision** - and it complicates the lookup process.
 
-We can't store multiple items at a single memory address - that defeats the purpose of having an "address". So, what to do? Well... we can store the first item at the address, $h(x)$, and keep with it a pointer to the location of the next element. At this second address we can keep the second item and keep with it a pointer to the third element (assuming we have multiple collisions)... and so on. Does this sound familiar? This is just a linked list which starts at address $h(x)$. Fig 3 shows two examples of a set using different hash functions, the first example only has one collision which results in a linked list of length two, starting at memory address $1$; the second example shows a set with a high number of collisions resulting in two long linked lists.
+We can't store multiple items at a single memory address - that defeats the purpose of having an "address". So, what to do? Well... we can store the first item at the address, $h(x)$, and keep with it a pointer to the location of the next element. At this second address we can keep the second item _and_ also a pointer to the third element... and so on. Does this sound familiar? This is just a linked list which starts at address $h(x)$. Fig 3 shows two examples of a set using different hash functions, the first example only has one collision which results in a linked list of length two, starting at memory address $1$; the second example shows a set with a high number of collisions resulting in two long linked lists.
 
 <FigureRow label="Fig 3." caption={"The same keys hashed by h(x)\u00a0=\u00a0x\u00a0mod\u00a08 into eight slots, then by h(x)\u00a0=\u00a0x\u00a0mod\u00a02 into two."}>
   <HashMapping chainRoom={4} />
@@ -59,7 +59,7 @@ We can't store multiple items at a single memory address - that defeats the purp
 
 **Long linked lists in a set are problematic** because they slow INSERTs and LOOKUPs down significantly. Performing an INSERT **without a collision** is an $O(1)$ operation. But if the INSERT maps to a location with $n$ items already living there, then it will take $n$ steps to traverse the list before appending the latest item to the end. This makes INSERTs **with a collision** an $O(n)$ operation - similarly, LOOKUPs on a linked list are $O(n)$ 😬.
 
-Therefore a **good hash function** is one that spreads the keys out across buckets where the chance of collision is low. This ensures very few linked lists exist and when they do they're short in length so that on average set operations are $O(1)$.
+Therefore a **good hash function** is one that spreads the keys out across buckets where the chance of collision is low. This ensures very few linked lists exist and when they do they're short in length so that, on average, set operations remain $O(1)$.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
