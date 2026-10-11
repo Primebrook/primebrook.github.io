@@ -25,12 +25,12 @@ We won't worry about irreversibility in this post.
 
 ## Sets: How do they work?
 
-The most basic hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The two most common operations to perform on a set are _inserts_ and _look ups_ ("is $x$ a member of my set?").
+The simplest hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The most common operations to perform on a set are _inserts_ and _look ups_ ("is $x$ a member of my set?").
 
 The process of inserting a key into a set is:
-1. Encode (e.g. UTF-8) the key to a positive integer, $x$
+1. Encode the key to a positive integer (e.g. UTF-8), $x$
 2. Compute the hash of the integer, $h(x)$
-3. The computed hash value is the memory address to store the key.
+3. The computed hash value provides the memory address to store the key.
 
 The process of looking up a specific key is:
 1. Encode the key to a positive integer, $x$
