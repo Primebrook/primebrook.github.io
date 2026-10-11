@@ -44,11 +44,11 @@ The process of looking up a specific key is:
   <SetOperation mode="lookup" />
 </FigureRow>
 
-These two operations are the core of all hash based data structures. For instance, hash tables (dictionaries in python) work the same way except they store a value alongside each key.
+These two operations are the core of all hash based data structures. For instance, hash tables (aka dictionaries) work the same way except they store a value alongside each key.
 
 ### Collisions & linked lists
 
-Since hash functions map a large space to a smaller space, you'd be correct in thinking that there often exist multiple inputs that get mapped to the same output value. When this happens in a set it's called a **collision** - and it complicates the lookup process.
+Since hash functions map a large space to a smaller space, you'd be correct in thinking that there often exist multiple inputs that get mapped to the same output value. When this happens in a set, it's called a **collision** - and it complicates the lookup process.
 
 We can't store multiple items at a single memory address - that defeats the purpose of having an "address". So, what to do? Well... we can store the first item at the address, $h(x)$, and keep with it a pointer to the location of the next element. At this second address we can keep the second item _and_ also a pointer to the third element... and so on. Does this sound familiar? This is just a linked list which starts at address $h(x)$. Fig 3 shows two examples of a set using different hash functions. The first example only has one collision which results in a linked list of length two, starting at memory address $1$; the second example shows a set with a high number of collisions resulting in two long linked lists.
 
