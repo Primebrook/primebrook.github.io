@@ -8,7 +8,7 @@ import FigureRow from '../../components/FigureRow.astro';
 import HashMapping from '../../components/HashMapping.astro';
 import SetOperation from '../../components/SetOperation.astro';
 
-**Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables (aka dictionaries) and bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions that map an arbitrarily large input space to a **fixed size output space**. That's it.
+**Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables and bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions that map an arbitrarily large input space to a **fixed size output space**. That's it.
 
 <FiniteOutput label="Fig 1." caption="A function maps an unbounded input space onto an output space of fixed size." />
 
@@ -28,11 +28,13 @@ We won't worry about irreversibility in this post.
 The simplest hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The most common operations to perform on a set are _inserts_ and _look ups_ ("is $x$ a member of my set?").
 
 The process of inserting a key into a set is:
+
 1. Encode the key to a positive integer (e.g. UTF-8), $x$
 2. Compute the hash of the integer, $h(x)$
 3. The computed hash value provides the memory address to store the key.
 
 The process of looking up a specific key is:
+
 1. Encode the key to a positive integer, $x$
 2. Compute the hash of the integer, $h(x)$, to get the memory address
 3. Check if memory address contains any values
@@ -41,6 +43,8 @@ The process of looking up a specific key is:
   <SetOperation mode="insert" />
   <SetOperation mode="lookup" />
 </FigureRow>
+
+These two operations are at the core of all hash based data structures. For instance, hash tables (dictionaries in python) work the same way except they store a value alongside each key.
 
 ## Collisions & Chaining
 
