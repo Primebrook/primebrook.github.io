@@ -48,7 +48,7 @@ These two operations are the core of all hash based data structures. For instanc
 
 ### Collisions & linked Lists
 
-Since hash functions map a large space to a smaller space, you'd be correct in thinking that there often exists multiple inputs that get mapped to the same output value. When this happens in a set it's called a **collision** - and it complicates the lookup process.
+Since hash functions map a large space to a smaller space, you'd be correct in thinking that there often exist multiple inputs that get mapped to the same output value. When this happens in a set it's called a **collision** - and it complicates the lookup process.
 
 We can't store multiple items at a single memory address - that defeats the purpose of having an "address". So, what to do? Well... we can store the first item at the address, $h(x)$, and keep with it a pointer to the location of the next element. At this second address we can keep the second item and keep with it a pointer to the third element (assuming we have multiple collisions)... and so on. Does this sound familiar? This is just a linked list which starts at address $h(x)$. Fig 3 shows two examples of a set using different hash functions, the first example only has one collision which results in a linked list of length two, starting at memory address $1$; the second example shows a set with a high number of collisions resulting in two long linked lists.
 
@@ -58,6 +58,8 @@ We can't store multiple items at a single memory address - that defeats the purp
 </FigureRow>
 
 **Long linked lists in a set are problematic** because they slow INSERTs and LOOKUPs down significantly. Performing an INSERT **without a collision** is an $O(1)$ operation. But if the INSERT maps to a location with $n$ items already living there, then it will take $n$ steps to traverse the list before appending the latest item to the end. This makes INSERTs **with a collision** an $O(n)$ operation - similarly, LOOKUPs on a linked list are $O(n)$ 😬.
+
+Therefore a **good hash function** is one that spreads the keys out across buckets where the chance of collision is low. This ensures very few linked lists exist and when they do they're short in length so that on average set operations are $O(1)$.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
@@ -69,8 +71,6 @@ The attack is the slow lookup above, made deliberate. Web frameworks load a requ
 PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been described in 2003 by Crosby and Wallach, and Perl fixed it then; most other languages hadn't. The fix that stuck was to stop using a fixed hash function: Python, for example, has picked a random hash seed for strings every time it starts since version 3.3.
 
 </details>
-
-### Chaining
 
 #### Random inputs or random functions?
 
