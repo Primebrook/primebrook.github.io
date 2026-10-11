@@ -10,7 +10,7 @@ import SetOperation from '../../components/SetOperation.astro';
 
 **Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables and bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions that map an arbitrarily large input space to a **fixed size output space**. That's it.
 
-<FiniteOutput label="Fig 1." caption="A function maps an unbounded input space onto an output space of fixed size." />
+<FiniteOutput label="Fig 1." caption="h maps an unbounded input space onto an output space of 8 values." />
 
 Typically, the finite output space indexes an array in memory, e.g. if the output space of a hash function is the integers between $0$ and $7$, then we're dealing with an array of size $8$. To be more explicit, hashing relies on two core properties:
 
@@ -25,7 +25,7 @@ We won't worry about irreversibility in this post.
 
 ## Sets: How do they work?
 
-The simplest hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The most common operations to perform on a set are _inserts_ and _look ups_ ("is $x$ a member of my set?").
+The simplest hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The most common operations to perform on a set are _inserts_ and _look ups_ ("is $y$ a member of my set?").
 
 The process of inserting a key into a set is:
 
@@ -44,11 +44,13 @@ The process of looking up a specific key is:
   <SetOperation mode="lookup" />
 </FigureRow>
 
-These two operations are at the core of all hash based data structures. For instance, hash tables (dictionaries in python) work the same way except they store a value alongside each key.
+These two operations are the core of all hash based data structures. For instance, hash tables (dictionaries in python) work the same way except they store a value alongside each key.
 
-## Collisions & Chaining
+### Collisions
 
-Since hash functions map a large space to a smaller space, you'd be correct in thinking that there may exist multiple inputs that get mapped to the same output value. When this happens in a hash data structure, it's called a **collision**,
+Since hash functions map a large space to a smaller space, you'd be correct in thinking that there may exist multiple inputs that get mapped to the same output value. When this happens in a set it's called a **collision** - and it complicates the lookup process.
+
+We can't store multiple items at a single memory address - that defeats the purpose of an "address". So what to do? Well... we can store the first item at the address and also a pointer to the location of the next element
 
 and it's unideal because values that collide are stored in the same bucket as a linked list. Accessing values in a linked list takes linear time.
 
@@ -69,6 +71,8 @@ The attack is the slow lookup above, made deliberate. Web frameworks load a requ
 PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been described in 2003 by Crosby and Wallach, and Perl fixed it then; most other languages hadn't. The fix that stuck was to stop using a fixed hash function: Python, for example, has picked a random hash seed for strings every time it starts since version 3.3.
 
 </details>
+
+### Chaining
 
 #### Random inputs or random functions?
 
