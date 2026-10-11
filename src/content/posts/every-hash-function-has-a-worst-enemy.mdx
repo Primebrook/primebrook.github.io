@@ -78,7 +78,7 @@ One way of getting good hashing is to start by assuming the **input keys themsel
 
 Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of $h$). Universal hashing says that if we put together an appropriate **family of hash functions** then we can pick $h$ at random from this family and have mathematical guarantees about the collision rate, regardless of the input distribution (i.e. for any input, hence "universal"). This element of randomness when selecting $h$ protects us against potential adversaries who might otherwise deliberately pass in colliding keys to slow down look ups. Let's define what it means to be a universal family of hash functions below.
 
-## Universal Family, $\mathcal{H}$ [WIP]
+## [WIP] Universal Family, $\mathcal{H}$
 
 Let $U$ be a set of keys that we want to hash into an array of $m$ buckets. Let $\mathcal{H}$ be a _family of hash functions_. $\mathcal{H}$ is called a **universal family** if for every pair of different keys $x$ and $y$, the probability that they collide when $h$ is selected at random from $\mathcal{H}$ is at most $1/m$.
 
