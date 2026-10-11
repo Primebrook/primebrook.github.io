@@ -208,12 +208,8 @@ const titleId = `hash-map-title-${Math.random().toString(36).slice(2, 8)}`;
         }
 
         chains[s].setAttribute('x2', String(target[0]));
-        if (collision) {
-          slots[s].classList.add('collision');
-          status.textContent = `h(${key}) = ${s}: collision, slot ${s} now holds ${depth[s]}`;
-        } else {
-          status.textContent = `h(${key}) = ${s}`;
-        }
+        if (collision) slots[s].classList.add('collision');
+        status.textContent = `h(${key}) = ${s}`;
         if (!reduceMotion) await sleep(collision ? 320 : 160);
         slots[s].classList.remove('hit');
       }
