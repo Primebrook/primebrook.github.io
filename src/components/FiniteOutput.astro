@@ -138,7 +138,6 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
 
   function setup(figure: HTMLElement) {
     const g = JSON.parse(figure.dataset.geometry!);
-    const fn = figure.dataset.fn!;
     const layer = figure.querySelector<SVGGElement>('.moving')!;
     const hash = figure.querySelector<SVGGElement>('.hash')!;
     const rangeEl = figure.querySelector<SVGGElement>('.range')!;

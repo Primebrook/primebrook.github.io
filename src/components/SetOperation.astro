@@ -1,0 +1,431 @@
+---
+// One set operation, step by step: each key is encoded to an integer x (its
+// UTF-8 bytes read as one number), hashed by h, and sent to that slot of the
+// array. h is shown as a black box (the slots come from x mod m, which the
+// figure doesn't name). mode="insert" stores the keys. mode="lookup" starts with
+// `stored` already in the array and checks each key: found if its slot holds
+// it, not in the set if the slot is empty. Two side by side in a FigureRow
+// show both operations. Built like HashMapping.
+import ReplayButton from './ReplayButton.astro';
+
+interface Props {
+  mode?: 'insert' | 'lookup';
+  /** The keys inserted, or looked up. */
+  keys?: string[];
+  /** For a lookup: the keys already in the set. */
+  stored?: string[];
+  slots?: number;
+  /** Shown in bold before the caption, e.g. "Fig 2." */
+  label?: string;
+  caption?: string;
+}
+
+const {
+  mode = 'insert',
+  keys = mode === 'insert' ? ['cat', 'dog', 'fox'] : ['dog', 'emu'],
+  stored = mode === 'insert' ? [] : ['cat', 'dog', 'fox'],
+  slots = 8,
+  label,
+  caption,
+} = Astro.props;
+
+const encode = (key: string) => [...new TextEncoder().encode(key)].reduce((n, b) => n * 256 + b, 0);
+const ops = keys.map((key) => ({ key, x: encode(key), slot: encode(key) % slots }));
+const held = stored.map((key) => ({ key, slot: encode(key) % slots }));
+
+const row = 40;
+const top = 66;
+const height = top + slots * row + 14;
+const midY = top + (slots * row) / 2;
+const keyX = 30;
+const encodeX = 104;
+const hashX = 204;
+const cellX = 304;
+const width = 404;
+const box = 56;
+const cell = { w: 52, h: row - 8 };
+const token = { w: 44, h: row - 12 };
+const slotY = (i: number) => top + i * row + row / 2;
+const keyY = (i: number) => midY + (i - (keys.length - 1) / 2) * row;
+const id = `set-op-${Math.random().toString(36).slice(2, 8)}`;
+// A fixed summary under the figure; it doesn't narrate the steps.
+const summary =
+  mode === 'insert'
+    ? `${ops.map((o) => `"${o.key}"`).join(', ')} stored in slots ${ops.map((o) => o.slot).join(', ')}`
+    : ops.map((o) => `"${o.key}" ${held.some((s) => s.key === o.key) ? 'is in the set' : 'is not in the set'}`).join('; ');
+---
+
+<figure
+  class="set-op"
+  data-mode={mode}
+  data-ops={JSON.stringify(ops)}
+  data-geometry={JSON.stringify({ midY, keyX, encodeX, hashX, cellX, cell, token, row, top })}
+>
+  <div class="frame">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={id}>
+      <desc id={id}>
+        {mode === 'insert'
+          ? `The keys ${keys.join(', ')} are inserted into a set one at a time. Each is encoded to an integer x, hashed by a hash function h, and stored in that slot of an array of ${slots} slots.`
+          : `A set holds ${stored.join(', ')}. The keys ${keys.join(', ')} are looked up one at a time: each is encoded to an integer x and hashed by a hash function h, and its slot is checked. ${ops.map((o) => (held.some((s) => s.key === o.key) ? `${o.key} is found in slot ${o.slot}` : `slot ${o.slot} is empty, so ${o.key} is not in the set`)).join('; ')}.`}
+      </desc>
+      <defs>
+        <marker id={`${id}-arrow`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+          <path class="arrowhead" d="M0 0 L8 4 L0 8 Z" />
+        </marker>
+      </defs>
+
+      <text class="title" x={width / 2} y="22" text-anchor="middle">{mode === 'insert' ? 'INSERT' : 'LOOK UP'}</text>
+
+      <text class="caption" x={keyX} y={top - 14} text-anchor="middle">keys</text>
+      <text class="caption" x={cellX} y={top - 14} text-anchor="middle">array</text>
+
+      {keys.map((_, i) => (
+        <rect class="key-slot" x={keyX - token.w / 2} y={keyY(i) - token.h / 2} width={token.w} height={token.h} rx="6" />
+      ))}
+
+      <line class="flow" x1={keyX + token.w / 2 + 8} y1={midY} x2={encodeX - box / 2 - 6} y2={midY} marker-end={`url(#${id}-arrow)`} />
+      <line class="flow" x1={encodeX + box / 2 + 6} y1={midY} x2={hashX - box / 2 - 6} y2={midY} marker-end={`url(#${id}-arrow)`} />
+      <line class="flow" x1={hashX + box / 2 + 6} y1={midY} x2={cellX - cell.w / 2 - 30} y2={midY} marker-end={`url(#${id}-arrow)`} />
+
+      <g class="step encode">
+        <rect x={encodeX - box / 2} y={midY - box / 2} width={box} height={box} rx="10" />
+        <text class="step-label small" x={encodeX} y={midY} text-anchor="middle" dy="0.35em">encode</text>
+      </g>
+      <text class="readout encode-out" x={encodeX} y={midY + box / 2 + 22} text-anchor="middle"></text>
+
+      <g class="step hash">
+        <rect x={hashX - box / 2} y={midY - box / 2} width={box} height={box} rx="10" />
+        <text class="step-label" x={hashX} y={midY} text-anchor="middle" dy="0.35em">h</text>
+      </g>
+      <text class="readout hash-out" x={hashX} y={midY + box / 2 + 22} text-anchor="middle"></text>
+
+      {
+        Array.from({ length: slots }, (_, i) => (
+          <g class="slot" data-slot={i}>
+            <rect x={cellX - cell.w / 2} y={slotY(i) - cell.h / 2} width={cell.w} height={cell.h} rx="6" />
+            <text class="index" x={cellX - cell.w / 2 - 10} y={slotY(i)} text-anchor="end" dy="0.35em">
+              {i}
+            </text>
+          </g>
+        ))
+      }
+
+      {held.map((s) => (
+        <g class="stored" transform={`translate(${cellX} ${slotY(s.slot)})`}>
+          <rect x={-token.w / 2} y={-token.h / 2} width={token.w} height={token.h} rx="6" />
+          <text text-anchor="middle" dy="0.35em">{s.key}</text>
+        </g>
+      ))}
+
+      <g class="keys"></g>
+    </svg>
+
+    <div class="controls">
+      <span class="status">{summary}</span>
+      <ReplayButton />
+    </div>
+  </div>
+  {
+    (label || caption) && (
+      <figcaption>
+        {label && <strong>{label}</strong>} {caption}
+      </figcaption>
+    )
+  }
+</figure>
+
+<script>
+  const SVG = 'http://www.w3.org/2000/svg';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  type Point = [number, number];
+  type Op = { key: string; x: number; slot: number };
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+  const place = (el: SVGElement, [x, y]: Point) => el.setAttribute('transform', `translate(${x} ${y})`);
+
+  function tween(el: SVGElement, from: Point, to: Point, ms: number) {
+    return new Promise<void>((resolve) => {
+      const start = performance.now();
+      const frame = (now: number) => {
+        const t = Math.min(1, (now - start) / ms);
+        const e = ease(t);
+        place(el, [from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e]);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function setup(figure: HTMLElement) {
+    const insert = figure.dataset.mode === 'insert';
+    const ops: Op[] = JSON.parse(figure.dataset.ops!);
+    const g = JSON.parse(figure.dataset.geometry!);
+    const layer = figure.querySelector<SVGGElement>('.keys')!;
+    const encodeBox = figure.querySelector<SVGGElement>('.step.encode')!;
+    const hashBox = figure.querySelector<SVGGElement>('.step.hash')!;
+    const encodeOut = figure.querySelector<SVGTextElement>('.encode-out')!;
+    const hashOut = figure.querySelector<SVGTextElement>('.hash-out')!;
+    const button = figure.querySelector<HTMLButtonElement>('[data-replay]')!;
+    const slots = [...figure.querySelectorAll<SVGGElement>('.slot')];
+    const held = new Set(
+      [...figure.querySelectorAll<SVGGElement>('.stored')].map((s) => s.textContent!.trim()),
+    );
+
+    const keyY = (i: number) => g.midY + (i - (ops.length - 1) / 2) * g.row;
+    const slotY = (i: number) => g.top + i * g.row + g.row / 2;
+    // A looked-up key stops just right of its slot, beside what's stored there.
+    const besideX = g.cellX + g.cell.w / 2 + 8 + g.token.w / 2;
+    let run = 0;
+
+    function makeToken(key: string) {
+      const el = document.createElementNS(SVG, 'g');
+      el.classList.add('token');
+      if (!insert) el.classList.add('query');
+      const rect = document.createElementNS(SVG, 'rect');
+      Object.entries({ x: -g.token.w / 2, y: -g.token.h / 2, width: g.token.w, height: g.token.h, rx: 6 })
+        .forEach(([k, v]) => rect.setAttribute(k, String(v)));
+      const text = document.createElementNS(SVG, 'text');
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dy', '0.35em');
+      text.textContent = key;
+      el.append(rect, text);
+      layer.append(el);
+      return el;
+    }
+
+    function mark(el: SVGGElement, found: boolean) {
+      const t = document.createElementNS(SVG, 'text');
+      t.classList.add('mark', found ? 'found' : 'missing');
+      t.setAttribute('x', String(g.token.w / 2 + 6));
+      t.setAttribute('dy', '0.35em');
+      t.textContent = found ? '✓' : '✗';
+      el.append(t);
+    }
+
+    async function play() {
+      const id = ++run;
+      button.disabled = true;
+      slots.forEach((s) => s.classList.remove('hit', 'found', 'missing'));
+      [encodeBox, hashBox].forEach((b) => b.classList.remove('busy'));
+      encodeOut.textContent = '';
+      hashOut.textContent = '';
+
+      layer.replaceChildren();
+      const tokens = ops.map((op, i) => {
+        const el = makeToken(op.key);
+        place(el, [g.keyX, keyY(i)]);
+        return el;
+      });
+
+      for (const [i, op] of ops.entries()) {
+        if (id !== run) return;
+        const found = held.has(op.key);
+        const target: Point = [insert ? g.cellX : besideX, slotY(op.slot)];
+        encodeOut.textContent = '';
+        hashOut.textContent = '';
+
+        if (!reduceMotion) {
+          tokens[i].classList.add('active');
+          await tween(tokens[i], [g.keyX, keyY(i)], [g.encodeX, g.midY], 420);
+          if (id !== run) return;
+          encodeBox.classList.add('busy');
+          encodeOut.textContent = `x = ${op.x}`;
+          await sleep(320);
+          encodeBox.classList.remove('busy');
+          await tween(tokens[i], [g.encodeX, g.midY], [g.hashX, g.midY], 380);
+          if (id !== run) return;
+          hashBox.classList.add('busy');
+          hashOut.textContent = `h(x) = ${op.slot}`;
+          slots[op.slot].classList.add('hit');
+          await sleep(320);
+          hashBox.classList.remove('busy');
+          await tween(tokens[i], [g.hashX, g.midY], target, 480);
+          if (id !== run) return;
+          tokens[i].classList.remove('active');
+        } else {
+          place(tokens[i], target);
+        }
+
+        if (!insert) {
+          slots[op.slot].classList.add(found ? 'found' : 'missing');
+          mark(tokens[i], found);
+        }
+        if (!reduceMotion) await sleep(insert ? 300 : 700);
+        slots[op.slot].classList.remove('hit');
+      }
+
+      encodeOut.textContent = '';
+      hashOut.textContent = '';
+      button.disabled = false;
+    }
+
+    button.addEventListener('click', play);
+
+    new IntersectionObserver((entries, observer) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        observer.disconnect();
+        play();
+      }
+    }, { threshold: 0.5 }).observe(figure);
+  }
+
+  document.querySelectorAll<HTMLElement>('.set-op').forEach(setup);
+</script>
+
+<style>
+  .set-op {
+    display: flex;
+    flex-direction: column;
+    margin: 2rem 0;
+  }
+  /* Fills the figure's height, so panels side by side in a FigureRow match and
+     their controls line up along the bottom. */
+  .frame {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem 1rem 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    max-width: 26rem;
+    height: auto;
+    margin: 0 auto;
+    font-family: inherit;
+  }
+  .title {
+    fill: var(--text);
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .caption {
+    fill: var(--muted);
+    font-size: 14px;
+  }
+  .key-slot {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .flow {
+    stroke: var(--rule);
+    stroke-width: 1.5;
+  }
+  .arrowhead {
+    fill: var(--rule);
+  }
+  .step rect {
+    fill: color-mix(in srgb, var(--text) 4%, transparent);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    transition: stroke 150ms, fill 150ms;
+  }
+  .step.busy rect {
+    stroke: var(--accent);
+    fill: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .step-label {
+    fill: var(--text);
+    font-size: 24px;
+    font-style: italic;
+  }
+  .step-label.small {
+    font-size: 14px;
+    font-style: normal;
+  }
+  .readout {
+    fill: var(--accent);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .slot rect {
+    fill: color-mix(in srgb, var(--text) 4%, transparent);
+    stroke: var(--rule);
+    stroke-width: 1.5;
+    transition: stroke 200ms, fill 200ms;
+  }
+  .slot.hit rect {
+    stroke: var(--muted);
+  }
+  .slot.found rect {
+    stroke: var(--text);
+  }
+  .slot.missing rect {
+    stroke: var(--accent);
+    fill: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .index {
+    fill: var(--muted);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    transition: fill 150ms;
+  }
+  .slot.hit .index {
+    fill: var(--accent);
+    font-weight: 700;
+  }
+  .stored rect {
+    fill: var(--bg);
+    stroke: var(--text);
+    stroke-width: 1.5;
+  }
+  .stored text {
+    fill: var(--text);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .set-op :global(.token rect) {
+    fill: var(--bg);
+    stroke: var(--text);
+    stroke-width: 1.5;
+    transition: stroke 150ms;
+  }
+  .set-op :global(.token.query rect) {
+    stroke-dasharray: 4 3;
+  }
+  .set-op :global(.token.active rect) {
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .set-op :global(.token text) {
+    fill: var(--text);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .set-op :global(.token .mark) {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .set-op :global(.token .mark.found) {
+    fill: var(--text);
+  }
+  .set-op :global(.token .mark.missing) {
+    fill: var(--accent);
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  figcaption strong {
+    color: var(--text);
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+</style>

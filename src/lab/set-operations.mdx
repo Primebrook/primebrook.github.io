@@ -1,0 +1,18 @@
+---
+title: Inserting into and looking up in a set
+description: "For Hashing Series Post 1, Sets section. Left: keys encoded, hashed by h and stored. Right: the same set, one key found and one not."
+---
+
+import FigureRow from '../components/FigureRow.astro';
+import SetOperation from '../components/SetOperation.astro';
+
+Placeholder prose, so the figure sits in a column of text the way it will in a post.
+Each key is encoded to an integer $x$, hashed to $h(x)$, and that slot is where it
+is stored, or where we look for it.
+
+<FigureRow label="Fig 2." caption={"Inserting three keys into a set, then looking up two of them."}>
+  <SetOperation mode="insert" />
+  <SetOperation mode="lookup" />
+</FigureRow>
+
+Text after the figure, to check the spacing below it.
