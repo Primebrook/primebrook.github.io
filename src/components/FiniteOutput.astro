@@ -1,8 +1,13 @@
 ---
 // The key property of a hash function, drawn as sets: an unbounded input
 // space (a shape bigger than the figure, fading out to the left) is mapped by
-// h, an arrow, onto a small output space of fixed size. Static: no script.
+// h, an arrow, onto a small output space of fixed size. Animated: a copy of
+// the input space's outline flows along the arrow, squeezing through it and
+// reshaping into the output space, while the input space's elements stream
+// along it and pile onto the output space's few points. The markup is the end
+// state, so without the script (or with reduced motion) it shows that.
 // The caption carries the words, so the only text in the picture is h.
+import ReplayButton from './ReplayButton.astro';
 
 interface Props {
   /** Number of points in the output space. */
@@ -18,7 +23,7 @@ const { outputs = 8, fn = 'h', label, caption } = Astro.props;
 
 const width = 480;
 const height = 330;
-const N = 120; // outline samples
+const N = 120; // outline samples; both shapes use the same count so one can morph into the other
 const domain = { cx: 58, cy: 168, r: (t: number) => 192 + 24 * Math.sin(3 * t + 0.5) + 14 * Math.sin(5 * t + 1.3) };
 const range = { cx: 418, cy: 178, r: (t: number) => 40 + 3 * Math.sin(3 * t + 0.4) };
 // The arrow runs from the input space's right edge to the output space's left.
@@ -50,17 +55,20 @@ const inside = (x: number, y: number) => {
   const t = Math.atan2(y - domain.cy, x - domain.cx);
   return Math.hypot(x - domain.cx, y - domain.cy) < domain.r(t < 0 ? t + 2 * Math.PI : t) - 8;
 };
-const dots: { x: number; y: number }[] = [];
+const dots: { x: number; y: number; to: number }[] = [];
 while (dots.length < 140) {
   const x = 6 + random() * 280;
   const y = 10 + random() * (height - 20);
-  if (inside(x, y)) dots.push({ x: +x.toFixed(1), y: +y.toFixed(1) });
+  if (inside(x, y)) dots.push({ x: +x.toFixed(1), y: +y.toFixed(1), to: Math.floor(random() * outputs) });
 }
 
 const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<figure class="finite">
+<figure
+  class="finite"
+  data-geometry={JSON.stringify({ N, domain: { cx: domain.cx, cy: domain.cy }, range: { cx: range.cx, cy: range.cy }, arrow, domainR, rangeR, points, dots })}
+>
   <div class="frame">
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-desc`}>
       <desc id={`${id}-desc`}>
@@ -93,14 +101,20 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
         </g>
       </g>
 
+      <g class="moving"></g>
+
       <line class="map" x1={arrow.x1} y1={arrow.y} x2={arrow.x2} y2={arrow.y} marker-end={`url(#${id}-arrow)`} />
       <text class="fn" x={(arrow.x1 + arrow.x2) / 2} y={arrow.y - 14} text-anchor="middle">{fn}</text>
 
       <g class="range">
         <path class="outline" d={outline(range.cx, range.cy, rangeR)} />
-        {points.map(([x, y]) => <circle class="point" cx={x} cy={y} r="3.2" />)}
+        {points.map(([x, y]) => <circle class="point hit" cx={x} cy={y} r="3.2" />)}
       </g>
     </svg>
+
+    <div class="controls">
+      <ReplayButton />
+    </div>
   </div>
   {
     (label || caption) && (
@@ -111,12 +125,136 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
   }
 </figure>
 
+<script>
+  const SVG = 'http://www.w3.org/2000/svg';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+  const clamp = (t: number) => Math.min(1, Math.max(0, t));
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+  function setup(figure: HTMLElement) {
+    const g = JSON.parse(figure.dataset.geometry!);
+    const layer = figure.querySelector<SVGGElement>('.moving')!;
+    const map = figure.querySelector<SVGLineElement>('.map')!;
+    const points = [...figure.querySelectorAll<SVGCircleElement>('.point')];
+    const button = figure.querySelector<HTMLButtonElement>('[data-replay]')!;
+    // Everything passes through the middle of the arrow.
+    const mid = { x: (g.arrow.x1 + g.arrow.x2) / 2, y: g.arrow.y };
+
+    // Elements nearest the arrow set off first, so the input space drains towards it.
+    const dots: { x: number; y: number; to: number }[] = [...g.dots].sort(
+      (a: { x: number }, b: { x: number }) => b.x - a.x,
+    );
+    const total = 5000;
+    const travel = 1500;
+    let run = 0;
+
+    function outline(cx: number, cy: number, radii: number[]) {
+      return (
+        radii
+          .map((r, i) => {
+            const t = (i / g.N) * 2 * Math.PI;
+            return `${i ? 'L' : 'M'}${(cx + r * Math.cos(t)).toFixed(1)} ${(cy + r * Math.sin(t)).toFixed(1)}`;
+          })
+          .join(' ') + ' Z'
+      );
+    }
+
+    // A point on the quadratic curve from a to b that bends through the arrow.
+    function via(a: [number, number], b: [number, number], t: number): [number, number] {
+      const c = [2 * mid.x - (a[0] + b[0]) / 2, 2 * mid.y - (a[1] + b[1]) / 2];
+      return [
+        (1 - t) ** 2 * a[0] + 2 * (1 - t) * t * c[0] + t * t * b[0],
+        (1 - t) ** 2 * a[1] + 2 * (1 - t) * t * c[1] + t * t * b[1],
+      ];
+    }
+
+    function finish() {
+      layer.replaceChildren();
+      figure.classList.remove('running');
+      map.classList.remove('busy');
+      points.forEach((p) => p.classList.add('hit'));
+      button.disabled = false;
+    }
+
+    function play() {
+      const id = ++run;
+      if (reduceMotion) return finish();
+      button.disabled = true;
+      layer.replaceChildren();
+      figure.classList.add('running');
+      points.forEach((p) => p.classList.remove('hit'));
+
+      const shape = document.createElementNS(SVG, 'path');
+      shape.classList.add('morph');
+      layer.append(shape);
+      const movers = dots.map(() => {
+        const c = document.createElementNS(SVG, 'circle');
+        c.classList.add('mover');
+        c.setAttribute('r', '2');
+        layer.append(c);
+        return c;
+      });
+
+      const start = performance.now();
+      const frame = (now: number) => {
+        if (id !== run) return;
+        const elapsed = now - start;
+
+        // The outline: the input space is pulled into the arrow, squeezed
+        // small, and comes out the other end as the output space.
+        const s = clamp(elapsed / total);
+        const squeezed = 10;
+        let cx: number, cy: number, radii: number[];
+        if (s < 0.5) {
+          const u = ease(s / 0.5);
+          [cx, cy] = [lerp(g.domain.cx, mid.x, u), lerp(g.domain.cy, mid.y, u)];
+          radii = g.domainR.map((r: number) => lerp(r, squeezed, u));
+        } else {
+          const u = ease((s - 0.5) / 0.5);
+          [cx, cy] = [lerp(mid.x, g.range.cx, u), lerp(mid.y, g.range.cy, u)];
+          radii = g.rangeR.map((r: number) => lerp(squeezed, r, u));
+        }
+        shape.setAttribute('d', outline(cx, cy, radii));
+        map.classList.toggle('busy', s > 0.38 && s < 0.62);
+
+        // The elements, each along the arrow to its point in the output space.
+        dots.forEach((d, i) => {
+          const delay = (i / dots.length) * (total - travel);
+          const t = clamp((elapsed - delay) / travel);
+          const [x, y] = via([d.x, d.y], g.points[d.to], ease(t));
+          movers[i].setAttribute('cx', x.toFixed(1));
+          movers[i].setAttribute('cy', y.toFixed(1));
+          movers[i].style.opacity = t === 0 || t === 1 ? '0' : '1';
+          if (t === 1) points[d.to].classList.add('hit');
+        });
+
+        if (elapsed < total) requestAnimationFrame(frame);
+        else finish();
+      };
+      requestAnimationFrame(frame);
+    }
+
+    button.addEventListener('click', play);
+
+    new IntersectionObserver((entries, observer) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        observer.disconnect();
+        play();
+      }
+    }, { threshold: 0.5 }).observe(figure);
+  }
+
+  document.querySelectorAll<HTMLElement>('.finite').forEach(setup);
+</script>
+
 <style>
   .finite {
     margin: 2rem 0;
   }
   .frame {
-    padding: 1rem;
+    padding: 1rem 1rem 0.75rem;
     border: 1px solid var(--rule);
     border-radius: 10px;
   }
@@ -135,18 +273,44 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
   }
   .domain .element {
     fill: var(--muted);
+    transition: opacity 400ms;
+  }
+  .domain .outline {
+    transition: opacity 400ms;
+  }
+  /* While running, the input space dims and the output space starts empty;
+     the markup's own look is the end state. */
+  .running .domain .element,
+  .running .domain .outline {
+    opacity: 0.45;
   }
   .range .outline {
     stroke: var(--accent);
     stroke-width: 1.5;
     fill: color-mix(in srgb, var(--accent) 8%, transparent);
+    transition: fill 300ms, stroke 300ms;
+  }
+  .running .range .outline {
+    stroke: var(--muted);
+    fill: color-mix(in srgb, var(--text) 5%, transparent);
   }
   .point {
     fill: var(--text);
+    stroke: var(--text);
+    stroke-width: 1.5;
+    transition: fill 200ms, stroke 200ms;
+  }
+  .point:not(.hit) {
+    fill: var(--bg);
+    stroke: var(--muted);
   }
   .map {
     stroke: var(--text);
     stroke-width: 1.8;
+    transition: stroke 150ms;
+  }
+  .map.busy {
+    stroke: var(--accent);
   }
   .arrowhead {
     fill: var(--text);
@@ -155,6 +319,19 @@ const id = `finite-${Math.random().toString(36).slice(2, 8)}`;
     fill: var(--text);
     font-size: 24px;
     font-style: italic;
+  }
+  .finite :global(.morph) {
+    fill: color-mix(in srgb, var(--accent) 10%, transparent);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+  .finite :global(.mover) {
+    fill: var(--accent);
+  }
+  .controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
   }
   figcaption {
     margin-top: 0.6rem;
