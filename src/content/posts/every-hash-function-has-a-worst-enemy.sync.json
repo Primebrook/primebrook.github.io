@@ -1,0 +1,20 @@
+{
+  "note": "Hashing Series (Post 1) - Every hash function has a worst enemy.md",
+  "stopAtHeading": "(Old Version",
+  "dropFromHeadings": " (Latest Version)",
+  "figures": {
+    "<DIAGRAM HERE \"INPUT SPACE TO OUTPUT SPACE": "<FiniteOutput label=\"{label}\" caption=\"{caption}\" />",
+    "<DIAGRAM HERE \"SET INSERT AND LOOK UP": [
+      "<FigureRow label=\"{label}\" caption=\"Inserting three keys into a set, then looking up two of them.\">",
+      "  <SetOperation mode=\"insert\" />",
+      "  <SetOperation mode=\"lookup\" />",
+      "</FigureRow>"
+    ],
+    "<DIAGRAM HERE \"KEYS TO AN ARRAY": [
+      "<FigureRow label=\"{label}\" caption={\"The same keys hashed by h(x)\\u00a0=\\u00a0x\\u00a0mod\\u00a08 into eight slots, then by h(x)\\u00a0=\\u00a0x\\u00a0mod\\u00a02 into two.\"}>",
+      "  <HashMapping chainRoom={4} />",
+      "  <HashMapping slots={2} chainRoom={4} />",
+      "</FigureRow>"
+    ]
+  }
+}

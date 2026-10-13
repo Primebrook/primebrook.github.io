@@ -13,6 +13,7 @@ npm run dev              # http://localhost:4321, drafts included
 npm run check            # type check
 npm run verify           # build, then scan for broken maths and Obsidian leftovers
 npm run inspect -- /writing/test-post/   # check a page in Chrome at phone and desktop width
+npm run sync -- <slug>                   # rebuild a converted post from its Obsidian note
 ```
 
 ## Writing a post
@@ -56,7 +57,7 @@ URL, left off the home page) and kept as a working example to copy from.
 | `src/pages/`, `src/layouts/` | home page, about page, post template |
 | `src/styles/global.css` | all styling, light and dark |
 | `astro.config.mjs` | maths pipeline and site-wide LaTeX macros |
-| `scripts/` | `verify-dist.mjs`, `inspect.mjs` |
+| `scripts/` | `verify-dist.mjs`, `inspect.mjs`, `sync-post.mjs` |
 
 `CLAUDE.md` has the full account of how it fits together, for working on it
 with Claude Code.

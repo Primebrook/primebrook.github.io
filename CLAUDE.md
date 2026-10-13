@@ -32,6 +32,7 @@ npm run check                 # TypeScript and Astro diagnostics
 npm run verify                # production build, then scan for problems (see below)
 npm run verify:drafts         # the same, with draft: true posts built too
 npm run inspect -- /writing/<slug>/   # real Chrome at 375px and 1280px: layout report + screenshots
+npm run sync -- <slug>        # rebuild a converted post from its Obsidian note (see "Keeping a converted post in sync")
 ```
 
 - `inspect` serves whatever is in `dist/`, so run `verify` (or
@@ -248,6 +249,55 @@ A post that's converted but not ready stays in `src/content/posts/` with
 `draft: true`. There's no separate drafts folder. When it's later finished in
 Obsidian, the vault copy is the source of truth: reconvert from it rather than
 editing both.
+
+## Keeping a converted post in sync with its note
+
+The first conversion is done by hand, with Brook (above). Once a post's figures
+are settled and Brook carries on editing the text in Obsidian ("made more
+changes to the obsidian file"), the post is rebuilt from the note by a script
+rather than by hand:
+
+```sh
+npm run sync -- <slug>    # rebuilds src/content/posts/<slug>.mdx (or .md) from its note
+```
+
+`scripts/sync-post.mjs` keeps the post's frontmatter and `import` lines,
+replaces everything after them with the note's body, turns `> [!question]- Title`
+callouts into `<details class="aside">` drop-downs, and swaps figure
+placeholders for components. It only reads the vault. Any other line starting
+with `<` stops it with an error, so a new placeholder can't reach the page
+unmapped.
+
+What's specific to a post lives in a table next to it,
+`src/content/posts/<slug>.sync.json` (the build ignores it: the collection only
+loads `.md`/`.mdx`). `every-hash-function-has-a-worst-enemy.sync.json` is the
+working example:
+
+| Key | Meaning |
+| --- | --- |
+| `note` | The note's filename in `~/personal/second_brain/notes/` |
+| `figures` | `{ "<placeholder line prefix>": markup }`, the markup a string or an array of lines. `{label}` becomes the `**Fig N.**` on the placeholder line, so renumbering in the note carries over; `{caption}` becomes the text after it. Escape `"` and `\` for JSON. |
+| `stopAtHeading` | Optional. The post ends at the first heading containing this, for a section Brook keeps in the note for later |
+| `dropFromHeadings` | Optional. Text removed from every heading, e.g. `" (Latest Version)"` |
+
+A new placeholder in the note means a new entry in the table (and usually a new
+component, built in the lab first). To set up sync for another post, write its
+table, run `npm run sync -- <slug>` and check `git diff` shows only Brook's
+recent edits.
+
+Each sync, in order:
+
+1. `npm run sync -- <slug>`, then `git diff --word-diff` and tell Brook what
+   changed in words. Check the diff is all Brook's: the post holds no text of
+   its own, so a change made only in the post is lost on the next sync. Put
+   fixes into the note instead (back it up first; drafts are often untracked
+   in the vault's git).
+2. `npm run verify`, then `npm run inspect -- /writing/<slug>/`.
+3. Commit. Push only if Brook said to in that message ("push to prod as
+   well"); otherwise ask. Keep unrelated unpushed commits out of the push, or
+   ask about them first. After pushing, `gh run watch` the new `deploy.yml`
+   run (check `gh run list` shows it, not the previous one) and `curl` the
+   live page for the new text.
 
 ## Layout and style
 
