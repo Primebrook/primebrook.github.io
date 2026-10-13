@@ -42,7 +42,7 @@ The process of looking up a specific key goes like:
 
 These two operations are the core of all hash based data structures - not just sets. For instance, hash tables (aka dictionaries) work the same way except they store a value alongside each key.
 
-### Collisions & Linked Lists
+## Collisions & Linked Lists
 
 Since hash functions map a large space to a smaller space, you'd be correct in thinking that there often exist multiple inputs that get mapped to the same output value. When this happens in a set, it's called a **collision** - and it complicates the lookup process.
 
@@ -68,7 +68,7 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 </details>
 
-### Good Hashing
+## Good Hashing
 
 One way of getting good hashing is to start by assuming the **input keys are nicely spread out**. If we assume the keys are drawn from some uniform distribution, then we won't get many collisions. But in the real world, data is clumpy, full of patterns and even adversarial. Hence if our implementation is to be useful, we cannot make any assumptions about the input keys.
 
