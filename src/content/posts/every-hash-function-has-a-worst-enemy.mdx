@@ -19,7 +19,7 @@ Typically, the output space indexes an array in memory. For example, if the outp
 
 with _irreversibility_ (unable to easily go backwards from output to input) an optional third property in the case of cryptographic hash functions. We won't worry about irreversibility.
 
-## Sets: How do they work?
+## Sets: Under The Hood
 
 The simplest hash based data structure is a **set**. A set is used for storing an unordered collection of distinct items (or "keys"). The most common set operations are **inserts** and **lookups**.
 
@@ -42,7 +42,7 @@ The process of looking up a specific key goes like:
 
 These two operations are the core of all hash based data structures. For instance, hash tables (aka dictionaries) work the same way except they store a value alongside each key.
 
-### Collisions & linked lists
+### Collisions & Linked Lists
 
 Since hash functions map a large space to a smaller space, you'd be correct in thinking that there often exist multiple inputs that get mapped to the same output value. When this happens in a set, it's called a **collision** - and it complicates the lookup process.
 
@@ -68,11 +68,11 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 </details>
 
-### Random inputs or random functions?
+### Good Hashing
 
-One way of getting good hashing is to start by assuming the **input keys themselves are nicely spread out**. If we assume the keys are drawn from some uniform distribution, then we won't get many collisions. But in the real world, data is clumpy, full of patterns and even adversarial. Hence if our implementation is to be useful, we cannot make *any* assumptions about the input keys.
+One way of getting good hashing is to start by assuming the **input keys are nicely spread out**. If we assume the keys are drawn from some uniform distribution, then we won't get many collisions. But in the real world, data is clumpy, full of patterns and even adversarial. Hence if our implementation is to be useful, we cannot make any assumptions about the input keys.
 
-Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of $h$). Universal hashing says that if we put together an appropriate **family of hash functions** then we can pick $h$ at random from this family and have mathematical guarantees about the collision rate, regardless of the input distribution (hence "universal"). This element of randomness when selecting $h$ protects us against potential adversaries who might otherwise deliberately pass in colliding keys to slow down look ups. Let's define what it means to be a universal family of hash functions below.
+Instead of assuming random inputs, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of $h$). Universal hashing says that if we put together an appropriate **family of hash functions** then we can pick $h$ at random from this family and have mathematical guarantees about the collision rate, regardless of the input distribution (hence "universal"). This element of randomness when selecting $h$ protects us against potential adversaries who might otherwise deliberately pass in colliding keys to slow down look ups. Let's define what it means to be a universal family of hash functions below.
 
 ## [WIP] Universal Family, $\mathcal{H}$
 
