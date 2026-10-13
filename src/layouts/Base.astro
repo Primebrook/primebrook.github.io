@@ -51,19 +51,5 @@ const year = new Date().getFullYear();
         {SITE.links.map((link) => <a href={link.href}>{link.label}</a>)}
       </span>
     </footer>
-
-    <script>
-      // A link to a collapsed <details> (e.g. #hashdos) opens it.
-      const open = (hash: string) => {
-        const id = decodeURIComponent(hash.slice(1));
-        const el = id && document.getElementById(id);
-        if (el instanceof HTMLDetailsElement) el.open = true;
-      };
-      document.addEventListener('click', (e) => {
-        const a = (e.target as Element).closest?.('a[href^="#"]');
-        if (a) open(a.getAttribute('href')!);
-      });
-      open(location.hash);
-    </script>
   </body>
 </html>

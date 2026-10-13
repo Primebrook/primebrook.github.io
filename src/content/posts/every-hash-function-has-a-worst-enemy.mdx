@@ -57,7 +57,7 @@ We can't store multiple items at a single memory address because that defeats th
 
 Therefore a **good hash function** is one that spreads the keys out across buckets where the chance of collision is low. This ensures very few linked lists exist and when they do they're short in length so that, on average, set operations remain $O(1)$.
 
-<details class="aside" id="hashdos">
+<details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
 
 At the 28th Chaos Communication Congress (28C3) in December 2011, Alexander Klink and Julian Wälde showed that the web platforms most of the internet ran on could be tied up by a single HTTP request. The talk is [Effective Denial of Service attacks against web application platforms](https://youtu.be/R2Cq3CLI6H8).
@@ -72,7 +72,7 @@ PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been des
 
 One way of getting good hashing is to start by assuming the **input keys themselves are nicely spread out**. If we assume the keys are drawn from some uniform distribution, then we won't get many collisions. But in the real world, data is clumpy, full of patterns and even adversarial. Hence if our implementation is to be useful, we cannot make *any* assumptions about the input keys.
 
-Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of $h$). Universal hashing says that if we put together an appropriate **family of hash functions** then we can pick $h$ at random from this family and have mathematical guarantees about the collision rate, regardless of the input distribution (hence "universal"). This element of randomness when selecting $h$ protects us against potential adversaries who might otherwise deliberately pass in colliding keys to slow down look ups (see the [HashDoS drop-down](#hashdos) above). Let's define what it means to be a universal family of hash functions below.
+Instead of assuming *random inputs*, perhaps we can make our choice of $h$ random? This is the idea behind **Universal Hashing**, it relocates the **randomness** from an area we don't control (inputs) to an area we do (choice of $h$). Universal hashing says that if we put together an appropriate **family of hash functions** then we can pick $h$ at random from this family and have mathematical guarantees about the collision rate, regardless of the input distribution (hence "universal"). This element of randomness when selecting $h$ protects us against potential adversaries who might otherwise deliberately pass in colliding keys to slow down look ups. Let's define what it means to be a universal family of hash functions below.
 
 ## [WIP] Universal Family, $\mathcal{H}$
 
