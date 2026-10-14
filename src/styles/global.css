@@ -104,7 +104,8 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
-.post-list a { flex: 1; }
+.post-list .title { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; }
+.post-list .series { color: var(--muted); font-size: 0.75rem; }
 .post-list a:hover { color: var(--accent); }
 .post-list .read { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
 
@@ -115,6 +116,34 @@ main {
 .post-header { margin-bottom: 2.5rem; }
 .post-header h1 { font-size: 2.5rem; line-height: 1.25; margin: 0 0 0.5rem; }
 .post-meta { color: var(--muted); font-size: 0.85rem; }
+
+/* Series: a kicker above the title, a box of parts after the post. */
+.series-kicker,
+.series-label {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.6rem;
+}
+.series-kicker a { color: inherit; text-decoration: none; }
+.series-kicker a:hover { text-decoration: underline; text-underline-offset: 2px; }
+.series-parts {
+  margin-top: 3.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.series-parts .series-label { margin-bottom: 0.25rem; }
+.series-title { font-weight: 700; font-size: 1.15rem; margin: 0; }
+.series-description { color: var(--muted); font-size: 0.9rem; margin: 0.25rem 0 0; }
+.series-parts ol { margin: 1rem 0 0; padding-left: 1.5rem; }
+.series-parts li { margin: 0.3rem 0; }
+.series-parts li::marker { color: var(--muted); }
+.series-parts a:hover { color: var(--accent); }
+.series-parts [aria-current] { font-weight: 700; }
+.series-more { color: var(--muted); font-size: 0.85rem; font-style: italic; margin: 0.75rem 0 0; }
 
 .prose h2, .prose h3 { line-height: 1.3; margin-top: 2.2em; }
 .prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }

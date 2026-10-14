@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import type { SeriesId } from '../series';
 
 export type Post = CollectionEntry<'posts'>;
 
@@ -20,4 +21,11 @@ export async function getListedPosts(): Promise<Post[]> {
 export function minutesRead(post: Post): number {
   const words = (post.body ?? '').split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 230));
+}
+
+/** The parts of a series that have a page, in part order. */
+export async function getSeriesParts(id: SeriesId): Promise<Post[]> {
+  return (await getPosts())
+    .filter((post) => post.data.series?.id === id)
+    .sort((a, b) => a.data.series!.part - b.data.series!.part);
 }

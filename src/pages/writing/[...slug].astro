@@ -1,7 +1,9 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import SeriesParts from '../../components/SeriesParts.astro';
 import { getPosts, minutesRead, type Post } from '../../lib/posts';
+import { SERIES } from '../../series';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -10,12 +12,20 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props as { post: Post };
 const { Content } = await render(post);
+const series = post.data.series;
 const date = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' }).format(post.data.pubDate);
 ---
 
 <Base title={post.data.title} description={post.data.description} noindex={post.data.unlisted || post.data.draft}>
   <article>
     <header class="post-header">
+      {
+        series && (
+          <p class="series-kicker">
+            Part {series.part} of <a href="#series">{SERIES[series.id].title}</a>
+          </p>
+        )
+      }
       <h1>{post.data.title}</h1>
       <p class="post-meta">
         <time datetime={post.data.pubDate.toISOString()}>{date}</time> · {minutesRead(post)} min read
@@ -24,5 +34,6 @@ const date = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' }).format(post
     <div class="prose">
       <Content />
     </div>
+    {series && <SeriesParts post={post} />}
   </article>
 </Base>

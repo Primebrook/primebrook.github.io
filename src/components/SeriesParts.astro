@@ -1,0 +1,35 @@
+---
+// The box at the end of a post in a series: the series, then every part with a
+// page, the current one marked rather than linked.
+import { SERIES } from '../series';
+import { getSeriesParts, type Post } from '../lib/posts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { id } = post.data.series!;
+const series = SERIES[id];
+const parts = await getSeriesParts(id);
+---
+
+<nav class="series-parts" id="series" aria-labelledby="series-title">
+  <p class="series-label">Series</p>
+  <p class="series-title" id="series-title">{series.title}</p>
+  {series.description && <p class="series-description">{series.description}</p>}
+  <ol>
+    {
+      parts.map((part) => (
+        <li value={part.data.series!.part}>
+          {part.id === post.id ? (
+            <span aria-current="page">{part.data.title}</span>
+          ) : (
+            <a href={`/writing/${part.id}/`}>{part.data.title}</a>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+  {!series.complete && <p class="series-more">More parts to come.</p>}
+</nav>

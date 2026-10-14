@@ -86,8 +86,17 @@ description: One sentence for search results and link previews.   # optional
 pubDate: 2026-10-01          # required; shown on the home list and post
 draft: true                  # optional: page exists in dev only, not built
 unlisted: true               # optional: built and reachable by URL, left off the home page, noindex
+series:                      # optional: only for a post that's part of a series
+  id: hashing                #   a key of SERIES in src/series.ts (title, description, complete)
+  part: 1
 ---
 ```
+
+A post in a series gets "Part N of <series>" above its title, a box listing
+every part (with a page) after the post, and the series name under its title on
+the home page. A new series is a new entry in `src/series.ts`; set
+`complete: true` there when its last part is out, which drops "More parts to
+come".
 
 The schema is in `src/content.config.ts`. Reading time is computed from the
 body at 230 words a minute (`src/lib/posts.ts`).
