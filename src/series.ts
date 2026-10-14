@@ -7,7 +7,7 @@
 // Most posts aren't in a series and leave this out.
 export const SERIES = {
   hashing: {
-    title: 'Being Lucky on Purpose',
+    title: 'Hashing – Being Lucky on Purpose',
     description: 'How do you get guarantees out of randomness?',
     // false shows "More parts to come" under the list of parts.
     complete: false,
