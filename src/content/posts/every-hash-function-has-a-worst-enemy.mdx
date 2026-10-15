@@ -58,7 +58,7 @@ We can't store multiple items at a single memory address because that defeats th
 
 **Long linked lists in a set are problematic** because they slow inserts and lookups down significantly. Performing an insert **without a collision** is an $O(1)$ operation. But if the insert maps to a location with $n$ items already living there, then it will take $n$ steps to traverse the list before appending the latest item to the end. This makes inserts **with a collision** an $O(n)$ operation; similarly, lookups on a linked list are $O(n)$ 😬.
 
-So what we'd like from a **good hash function** is one that spreads keys out evenly across the buckets, so that collisions are rare, linked lists stay short and set operations remain O(1) on average.
+So what we'd like from a **good hash function** is one that spreads keys out evenly across the buckets, so that collisions are rare, linked lists stay short and set operations remain $O(1)$ on average.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
