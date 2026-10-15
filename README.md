@@ -1,6 +1,6 @@
 # Brook's Blog
 
-Source for [primebrook.github.io](https://primebrook.github.io): writing on
+Source for [brookabraha.dev](https://brookabraha.dev): writing on
 computer science, mathematics and software engineering.
 
 Built with [Astro](https://astro.build), with maths by
@@ -41,7 +41,7 @@ $$\Pr[h(x) = h(y)] \leq \frac{1}{m}$$
 - **Diagrams, algorithms and animations** need an `.mdx` post, which can use the
   components in `src/components/`.
 
-The [test post](https://primebrook.github.io/writing/test-post/)
+The [test post](https://brookabraha.dev/writing/test-post/)
 (`src/content/posts/test-post.mdx`) uses every feature: extended LaTeX,
 pseudocode, Mermaid, images and an animated diagram. It's unlisted (reachable by
 URL, left off the home page) and kept as a working example to copy from.

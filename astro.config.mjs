@@ -21,7 +21,7 @@ const macros = {
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://primebrook.github.io',
+  site: 'https://brookabraha.dev',
 
   markdown: {
     // Astro 7's default Markdown processor (Sätteri) takes no remark/rehype

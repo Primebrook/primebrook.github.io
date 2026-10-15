@@ -1,6 +1,6 @@
 # Brook's blog
 
-Source for **https://primebrook.github.io**: Brook's writing on computer science,
+Source for **https://brookabraha.dev**: Brook's writing on computer science,
 mathematics and software engineering. Astro 7 static site, KaTeX for maths,
 deployed to GitHub Pages by GitHub Actions on every push to `main`.
 
@@ -64,7 +64,7 @@ npm run sync -- <slug>        # rebuild a converted post from its Obsidian note 
    animation finish. A passing report is not the same as looking: read at least
    the phone-width screenshots of anything with maths, tables or diagrams.
 4. **Commit and push to `main`.** Then `gh run watch` on the latest
-   `deploy.yml` run, and `curl -s https://primebrook.github.io/writing/<slug>/`
+   `deploy.yml` run, and `curl -s https://brookabraha.dev/writing/<slug>/`
    to confirm it's live. Commit subjects are short and imperative
    ("Publish the universal hashing post").
 
@@ -338,6 +338,13 @@ Each sync, in order:
 - **Deploy.** `.github/workflows/deploy.yml` (`withastro/action`, then
   `actions/deploy-pages`). The Pages source is set to **GitHub Actions**, not a
   branch or folder, so the workflow is the only way anything gets published.
+- **Domain.** `brookabraha.dev`, registered and DNS-hosted at GoDaddy: four
+  `A` and four `AAAA` records on `@` pointing at GitHub Pages, and `www` a
+  CNAME to `primebrook.github.io`. The custom domain is set in the repo's Pages
+  settings (no `CNAME` file: with an Actions deploy, the setting is what
+  counts), and `primebrook.github.io` redirects to it. `.dev` is HTTPS-only in
+  every browser, so the site depends on GitHub's automatic certificate and
+  "Enforce HTTPS". `site` in `astro.config.mjs` must match the domain.
 - **Headless Chrome.** A plain `chrome --headless --screenshot` lays a page
   out at 500px minimum and freezes timers under `--virtual-time-budget`, so
   phone widths and animations can't be checked that way. `scripts/inspect.mjs`
