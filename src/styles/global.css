@@ -3,9 +3,11 @@
   --text: #15171a;
   --muted: #8a8f98;
   --rule: #ececec;
-  --accent: #e5533d;
+  --accent: #4f46e5;
   --measure: 45rem; /* 720px, kingori.co's article width */
   --measure-home: 36rem;
+  --font-body: 'Mulish', system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-body);
   color-scheme: light dark;
 }
 
@@ -15,7 +17,7 @@
     --text: #e6e6e6;
     --muted: #8a8f98;
     --rule: #2a2d31;
-    --accent: #ff7a5c;
+    --accent: #8b8cf8;
   }
 }
 
@@ -30,7 +32,7 @@ body {
   flex-direction: column;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Mulish', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 1.0625rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
@@ -64,7 +66,8 @@ main {
 .site-header nav a { font-weight: 600; font-size: 0.95rem; }
 .site-header nav a:hover,
 .site-footer a:hover { color: var(--accent); }
-.wordmark { font-weight: 700; }
+.wordmark { font-weight: 700; font-family: var(--font-heading); }
+h1, h2, h3, h4, .series-title { font-family: var(--font-heading); }
 
 .site-footer {
   border-top: 1px solid var(--rule);
