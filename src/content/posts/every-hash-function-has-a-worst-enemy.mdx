@@ -11,7 +11,7 @@ import FigureRow from '../../components/FigureRow.astro';
 import HashMapping from '../../components/HashMapping.astro';
 import SetOperation from '../../components/SetOperation.astro';
 
-**Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables and bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions that map an arbitrarily large input space to a **fixed size output space**. That's it.
+**Hash functions** are fundamental in computer science. They're used in foundational data structures like sets, hash tables and Bloom filters; they're also used in cryptography to conceal private information. So, what are hash functions? Well... they're functions that map an arbitrarily large input space to a **fixed size output space**. That's it.
 
 <FiniteOutput label="Fig 1." caption="h maps an unbounded input space onto an output space of 8 values." />
 
@@ -58,7 +58,7 @@ We can't store multiple items at a single memory address because that defeats th
 
 **Long linked lists in a set are problematic** because they slow inserts and lookups down significantly. Performing an insert **without a collision** is an $O(1)$ operation. But if the insert maps to a location with $n$ items already living there, then it will take $n$ steps to traverse the list before appending the latest item to the end. This makes inserts **with a collision** an $O(n)$ operation; similarly, lookups on a linked list are $O(n)$ 😬.
 
-Therefore a **good hash function** is one that spreads the keys out across buckets where the chance of collision is low. This ensures very few linked lists exist and when they do they're short in length so that, on average, set operations remain $O(1)$.
+So what we'd like from a **good hash function** is one that spreads keys out evenly across the buckets, so that collisions are rare, linked lists stay short and set operations remain O(1) on average.
 
 <details class="aside">
 <summary>When collisions became an attack: HashDoS, 2011</summary>
@@ -70,6 +70,8 @@ The attack is the slow lookup above, made deliberate. Web frameworks load a requ
 PHP, ASP.NET, Java, Python and Ruby were all affected. The weakness had been described in 2003 by Crosby and Wallach, and Perl fixed it then; most other languages hadn't. The fix that stuck was to stop using a fixed hash function: Python, for example, has picked a random hash seed for strings every time it starts since version 3.3.
 
 </details>
+
+Suppose $h$ maps a universe of keys, $U$, into $m$ buckets, then some bucket must receive at least $|U|/m$ keys. Since $U$ is typically much larger than $m$, that bucket holds an enormous number of keys, and an adversary who knows the definition of $h$ can pick $n$ of them and force every operation down one $O(n)$ linked list. This is true for every _fixed_ $h$ - regardless of how well designed it is. This is why a proper solve to this problem has to be randomising the choice of $h$ rather than simply designing a better function.
 
 ## Good Hashing
 
